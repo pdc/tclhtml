@@ -1,0 +1,133 @@
+# Makefile.in -- generator for the makefile for TclHTML
+
+version		= @VERSION@
+prefix		= @PREFIX@
+scriptdir	= @SCRIPTDIR@
+datadir		= @DATADIR@
+htmldir		= @HTMLDIR@
+mandir		= @MANDIR@
+man1dir		= @MAN1DIR@
+man5dir		= @MAN5DIR@
+
+TCLSH		= @TCLSH@
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+INSTALL_SCRIPT	= @INSTALL_SCRIPT@
+
+thFiles		= tclhtml.th hello.th COPYING.th install.th
+moreHtmlFiles	= tclhtml.css COPYING.css 
+htmlFiles	= $(thFiles:.th=.html) $(moreHtmlFiles)
+dataFiles	= htmlProcs.tcl
+scriptInFiles	= thmkmf.in
+moreScriptFiles	= notables
+scriptFiles	= thc $(moreScriptFiles) $(scriptInFiles:.in=)
+man1InFiles	= thmkmf.1.in thc.1.in
+moreMan1Files	= notables.1
+man1Files	= $(man1InFiles:.in=) $(moreMan1Files)
+distFiles	= configure Makefile.in \
+		README COPYING VERSION INSTALL install.html \
+		tclhtml-80x40.gif \
+		$(dataFiles) \
+		thc.in $(scriptInFiles) $(moreScriptFiles) \
+		$(thFiles) $(moreHtmlFiles) \
+		$(man1InFiles) $(moreMan1Files)
+
+all:		$(htmlFiles) $(man1Files) $(scriptFiles)
+
+thc.1:		config.status thc.1.in
+	sed -e s,#HTMLDIR#,$(htmldir), -e s,#DATADIR#,$(datadir), \
+		< thc.1.in > $@
+
+thmkmf.1:	config.status thmkmf.1.in
+	sed -e s,#HTMLDIR#,$(htmldir), -e s,#DATADIR#,$(datadir), \
+		< thmkmf.1.in > $@
+
+thmkmf:		config.status thmkmf.in
+	sed -e s,#SCRIPTDIR#,$(scriptdir), -e s,#TCLSH#,$(TCLSH),\
+		< thmkmf.in > thmkmf
+	chmod +x thmkmf
+
+thc:		config.status thc.in
+	sed -e s,#SCRIPTDIR#,$(scriptdir), -e s,#TCLSH#,$(TCLSH),\
+		< thc.in > thc
+	chmod +x thc
+
+tclhtml.html:	tclhtml.th hello.th hello.html  ./thc htmlProcs.tcl
+	touch tclhtml.aux
+	cp -f tclhtml.aux tmp.aux
+	$(TCLSH) ./thc tclhtml.th
+	if ! cmp -s tclhtml.aux tmp.aux; then \
+		$(TCLSH) ./thc tclhtml.th; \
+	fi
+	rm -f tmp.aux
+
+install:	all
+	test -d $(scriptdir) || mkdir -p $(scriptdir)
+	sed 's,set tclhtml_libdir .,set tclhtml_libdir {$(datadir)},' \
+			< thc > $(scriptdir)/thc
+	chmod 755 $(scriptdir)/thc
+	for i in $(scriptInFiles:.in=) $(moreScriptFiles); do \
+		$(INSTALL_SCRIPT) $$i $(scriptdir)/$$i; \
+	done
+	test -d $(datadir) || mkdir -p $(datadir)
+	for i in $(dataFiles); do \
+		$(INSTALL_DATA) $$i $(datadir)/$$i; \
+	done
+	test -d $(man1dir) || mkdir -p $(man1dir)
+	for i in $(man1Files); do \
+		$(INSTALL_DATA) $$i $(man1dir)/$$i; \
+	done
+	test -d $(htmldir) || mkdir -p $(htmldir)
+	for i in $(htmlFiles); do \
+		$(INSTALL_DATA) $$i $(htmldir)/$$i; \
+	done
+
+uninstall:
+	cd $(scriptdir); rm -f thc $(moreScriptFiles)
+	cd $(datadir); rm -f $(dataFiles)
+	cd $(man1dir); rm -f $(man1Files)
+	cd $(htmldir); rm -f $(htmlFiles)
+	-rmdir $(datadir) $(htmldir)
+
+distDir		= tclhtml-$(version)
+dist:		$(distFiles)
+	-rm -rf $(distDir)
+	mkdir $(distDir)
+	cp -p $(distFiles) $(distDir)
+	tar -czvf $(distDir).tgz $(distDir)
+	rm -rf $(distDir)
+
+sf.tgz: sourceforge/index.th tclhtml.th hello.th \
+		tclhtml.css tclhtml-80x40.gif
+	cd sourceforge;\
+	cp -sf ../tclhtml.th ../hello.th ../tclhtml.css ../tclhtml-80x40.gif .;\
+	../thmkmf;\
+	$(MAKE)
+	tar czhf sf.tgz sourceforge
+
+clean:
+	rm -f $(thFiles:.th=.html) *.aux tmp.* $(man1Files:.1=.ps)\
+		thc thmkmf
+
+realclean:	clean
+	rm -f thc.1
+
+distclean:	realclean
+	rm -f Makefile config.status
+
+Makefile:	Makefile.in config.status
+	$(TCLSH) ./config.status $@
+
+config.status:	configure VERSION
+	$(TCLSH) ./config.status -r -n
+
+.SUFFIXES: .th .html .in .1 .ps
+
+%.html: %.th htmlProcs.tcl ./thc
+	$(TCLSH) ./thc $<
+
+%:	%.in config.status
+	$(TCLSH) ./config.status $@
+
+.1.ps:	
+	groff -Tps -man $< > $@
