@@ -1,0 +1,113 @@
+// 
+
+x {
+}
+
+body {
+	font-family:	times, times new roman, serif;
+}
+
+p {
+	margin-left:	3em;
+}
+
+table p {
+	margin-left:	0em;
+}
+
+dl {
+	margin-left: 	3em;
+}
+
+table dl {
+	margin-left:	0em;
+}
+
+dt {
+	margin-top:	1ex;
+}
+
+ul, ol {
+	margin-left:	3em;
+}
+
+table ul, table ol {
+	margin-left: 	0pt;
+}
+
+blockquote {
+	margin-left:	6em;
+}
+
+blockquote p {
+	margin-left: 	0pt;
+}
+
+th {
+	background-color: #336666;
+	color:		#FFFFFF;
+	font-family:	helvetica, arial, sanserif;
+	font-size:	80%;
+	font-weight:	600;
+}
+
+td {
+	background-color: #F0F0E0;
+}
+
+td.border {
+	background-color: #336666;
+}
+
+h1 {
+	font-family:	helvetica, arial, sanserif;
+	font-size:	300%;
+	font-weight:	400;
+	margin-top:	2ex;
+	margin-bottom:	1ex;
+	text-align:	left;
+	color:		#000000;
+}
+
+h1 .tcl {
+	font-family:	times, times roman, serif;
+	font-weight:	250;
+	font-style:	italic;
+}
+
+h1 .html {
+	font-family:	helvetica, arial, sanserif;
+	font-weight:	750;
+	color:		#336666;
+}
+
+p.slogan {
+	font-family:	times, times roman, serif;
+	font-size: 	14pt;
+	font-style:	italic;
+	font-weight:	250;
+	text-align:	left;
+	color:		#336666;
+}
+
+h2 {
+	font-family:	helvetica, arial, sansserif;
+	font-size:	150%;
+	font-weight:	400;
+	margin-top:	2ex;
+}
+
+h3 {
+	font-family:	helvetica, arial, sans;
+	font-size:	100%;
+	font-weight:	700;
+	margin-left:	3em;
+}
+
+code {
+	font-family:	helvetica, arial, sanserif;
+}
+
+pre {
+	font-family:	helvetica, arial, sanserif;
+}

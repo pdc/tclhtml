@@ -1,0 +1,173 @@
+# index.th -- 							-*-tcl-*-
+#  Generates index.html.
+
+beginDocument -file index.html {
+    # The following commands define metadata about the document.
+    # They translate as elements within the HTML `head' element.
+
+    title "TclHTML -- SourceForge"
+    keywords TclHTML Tcl HTML
+    stylesheet sf.css
+}
+
+# Here we define default attributes for some HTML elements.
+# This is less of a big deal with XML, which has support for
+# supply default attributes through tweaking the DOCTYPE.
+
+defaultAttrs hr noshade size=1
+defaultAttrs img border=0 alt=
+defaultAttrs table border=0 cellspacing=0 cellpadding=0
+defaultAttrs tr align=left valign=top
+defaultAttrs th align=left valign=top
+
+# I can also use Tcl variables to keep track of repeated code.
+
+set bgColor #F8F8F0
+
+table width=100% cellpadding=8 cellspacing=4  {
+    tr {
+	td* rowspan=4 {
+	    h1 "[span* class=tcl Tcl][span* class=html HTML]"
+
+	    p class=logo "Use Tcl to generate HTML and XHTML documents."
+
+	    p "
+	    [strong Problem.]
+	    My Internet account comes with 20[nbsp]MiB of web space,
+	    but does not allow for CGI scripts -- static HTML only.
+	    I needed a way to produce a slew of HTML pages with
+	    repeated elements (such as navigation bars),
+	    without resorting to doing it all myself with
+	    cut &amp; paste -- a tedious and error-prone process at best.
+	    "
+
+	    p "
+	    [strong Solution.]
+	    Inspired by Don Libe's paper on using Tcl to program
+	    CGI scripts, I applied the same approach 
+	    to generating my HTML files.  After several rewrites
+	    of the Tcl macro library I have decided to have a go at 
+	    wrapping it up as a little Tcl package.  Thus
+	    TclHTML.
+	    "
+
+	    hr
+
+	    p "
+	    Here's an example of TclHTML at work.
+	    If you are familiar with Tcl and HTML, 
+	    you should be able to get the gist of what is going on:
+	    for each HTML tag there is a Tcl command which generates it.
+	    "
+
+	    table width=100% {
+		tr {
+		    td* bgcolor=#336666 {
+			table width=100% cellspacing=1 cellpadding=4 {
+			    tr {
+				td* bgcolor=$bgColor {
+pre -encode {ul {
+    li "First one thing,"
+    li "Then another"
+}}
+                                }
+				td* bgcolor=$bgColor {
+pre -encode {<ul>
+  <li>First one thing,</li>
+  <li>Then another</li>
+</ul>}
+				}
+				td* bgcolor=$bgColor {
+				    ul {
+					li "First one thing,"
+					li "Then another"
+				    }
+				}
+	    }   }   }   }   }
+
+	    p "
+	    One of the attractions of Tcl for this application is that
+	    it allows me to define [em new control structures] to match
+	    the structure of HTML documents.  In the above example,
+	    the Tcl command [code ul] takes a Tcl script as its
+	    last argument, which contains [code li] commands to generate
+	    the content of the [code ul] element.
+	    "
+
+	    p "
+	    For a longer example, try
+	    [a index.th the Tcl code for this page],
+	    and compare it with the HTML code (`View Source').
+	    "
+
+	    p "[a tclhtml.html TclHTML manual.]"
+	}
+
+	td* class=sfmenu color=#FFFFFF width=96 {
+
+	    # Note that the first parameter of the `img' contains
+	    # an ampersand.  This will be translated to the entity 
+	    # &amp; by TclHTML, as required by HTML, XHTML and XML recs.
+	    p align=center "
+	    [a http://sourceforge.net/ \
+	    [img http://sourceforge.net/sflogo.php?group_id=1989&type=1\
+		    "alt=Hosted by SourceForge"\
+		    width=88 height=31]]
+	    "
+
+	    # Here's a simple example of how we can use Tcl procs
+	    # to provide higher-level commands.
+	    proc sfLink {href icon title} {
+		p class=sflink "
+		[a http://sourceforge.net/$href?group_id=1989 $title]
+		"
+		# This used to include an img tag,
+		# but SourceForge have dropped the icons 
+		# for project subsections.
+	    }
+	    sfLink project/ anvil24 Summary
+	    sfLink forum/ notes Notes
+	    sfLink bugs/ bug "Bug List"
+	    # sfLink support/ support Support
+	    # sfLink patch/ patch Patches
+	    # sfLink mail/ mail "Mailing Lists"
+	    sfLink pm/ index "Tasks"
+	    # sfLink survey/ survey Surveys
+	    sfLink news/ news News
+	    sfLink cvs/ convert CVS
+	    sfLink project/filelist.php save Downloads
+	}
+    }
+    tr {
+	td* bgcolor=#FFFFFF class=tclmenu align=center {
+	    p class=tcllink "
+	    [a http://www.scriptics.com/ \
+		    [img tclLogo100.png "alt=Tcl home"]]
+	    "
+	    # This `img' command does not supply attributes
+	    # width and height, because TclHTML can infer them
+	    # from the image file.
+	}
+    }
+    tr {
+	td* bgcolor=#FFFFFF class=htmlmenu align=center {
+	    p class=htmllink "
+	    [a http://validator.w3.org/check/referer \
+		    [img http://validator.w3.org/images/vxhtml10\
+		    width=88 height=31 "alt=Validated XHTML 1.0!"]]
+	    "
+
+	    p class=htmllink "
+	    [a http://jigsaw.w3.org/css-validator/validator?uri=http://tclhtml.sourceforge.net/sf.css \
+		    [img http://jigsaw.w3.org/css-validator/images/vcss.gif\
+		    width=88 height=31 "alt=Validated CSS!"]]
+	    "
+	}
+    }
+    tr {
+	td [nbsp]
+    }
+
+}
+
+endDocument

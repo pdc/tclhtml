@@ -1,0 +1,8 @@
+# hello.th		-*-tcl-*-
+
+beginDocument {
+    title "Hello, World!"
+}
+h1 "Hello, World!"
+p "\u011Cis revido!"
+endDocument
