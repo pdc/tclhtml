@@ -1,0 +1,62 @@
+#!/bin/sh
+# -*-tcl-*- \
+exec #TCLSH# "$0" "$@"
+
+# thc --
+#  The TclHTML Compiler:  convert .th files to HTML documents.
+# Options --
+#  --subdir=DIR, -s DIR
+#	set the location of this page within the strcture of the HTML tree
+#  --html_root=DIR, -r DIR
+#	set the location of *root* the HTML tree
+#	(used when looking for image files).
+#	Note that the expected final position of the pages
+#	is [file join rootdir subdir]
+
+set id {$Id: thc.in,v 1.2 2001/01/26 22:59:32 pdc Exp $}
+
+set tclhtml_libdir . 
+
+source [file join $tclhtml_libdir htmlProcs.tcl]
+namespace import html::*
+
+set srcDir .
+
+foreach arg $argv {
+    if {[info exists opt]} {
+	htmlOption $opt $arg
+	unset opt
+    } else {
+	switch -glob -- $arg {
+	    -s - --sub - --subdir {
+		set opt subDir
+	    }
+	    --subdir=* {
+		regsub "^--subdir=" $arg "" subDir
+		htmlOption subDir $subDir
+	    }
+	    -r - --html - --html_root - --htmlroot {
+		set opt htmlRootDir
+	    }
+	    --html_root=* {
+		regsub "^--html_root=" $arg "" htmlRoot
+		htmlOption htmlRootDir $htmlRoot
+	    }
+	    default {
+		set inFileName $arg
+		set html::infos(inFileName) $inFileName
+		set dirs [list $tclhtml_libdir ~ [htmlOption rootDir]]
+		if {"[htmlOption rootDir]" != "."} {
+		    lappend dirs .
+		}
+		foreach dir $dirs {
+		    if {"$dir" == "~"} {
+			set f [file join $dir .tclhtml.conf]
+		    } else {
+			set f [file join $dir tclhtml.conf]
+		    }
+		    if {[file exists $f]} {
+			source $f
+		}   }
+		source $inFileName
+}   }   }   }

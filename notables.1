@@ -1,0 +1,164 @@
+.TH NOTABLES 1 "TclHTML 5.1" "$Date: 2001/01/26 22:59:32 $" "COMMANDS"
+.SH NAME
+notables \- strip TABLE and other fancy elements from HTML documents,
+creating a plain-text version
+.SH SYNOPSIS
+.B notables
+[
+.B \-\-filter
+|
+.B \-f
+]
+[
+.I file
+|
+.I dir
+].\|.\|.
+.br
+.B notables 
+.B \-\-help
+|
+.B \-\-version
+.SH DESCRIPTION
+.na
+This command reads one or more HTML files and creates copies of them,
+stripping out several HTML elements that do not display well on 
+non-graphical browsers.  The result is a version of the page which
+is likely to be more useful to people using text browsers like
+.IR lynx ,
+or browsers designed for people with visual disabilities.
+.PP
+For each
+.I file
+argument, a file whose name has the suffix 
+.B \-n 
+inserted before the conventional
+.B .html
+ending.  Thus 
+.I index.html
+would have a corresponding no-tables version named
+.IR index\-n.html .
+.PP
+Any directories named in 
+.I dir
+aguments are scanned for HTML files and directories, which are then processed
+recursively.  (HTML files already ending 
+.B \-n.html
+are skipped.)
+.PP
+The results of this conversion depend on the original HTML having been
+written with a little care in the first place.
+Since one can include paragraph 
+.RB ( P )
+tags in table cells, it is often possible to contrive a page that uses
+tables for layout so that it still looks reasonable with table tags
+stripped.
+.SH OPTIONS
+.TP
+.BR \-\-filter ", " \-f
+Behave as a Unix filter \- reading from the standard input stream
+if no 
+.I file
+arguments are supplied, and writing to the standard output stream.
+.TP
+.BR \-\-version ", " \-V
+Print the version number of the program.
+.TP
+.BR \-\-help ", " \-h ", " \-?
+Print a summary of the options understood by this program.
+.SH "HTML PROCESSING"
+These tags are simply removed:
+.BR area ,
+.BR caption ,
+.BR font ,
+.BR table ,
+.BR td ,
+.BR th ,
+.BR tr ,
+and the nonstandard tag
+.BR layer .
+.PP
+Image tags 
+.RB ( img )
+are replaced with the value of their
+.B alt
+attributes, if defined.
+.PP
+Horizontal rules
+.RB ( hr )
+can have a
+.B title
+attribute in HTML 4.0, and this is used as their replacement text.
+.PP
+Local links
+(anchor 
+.RB  ( a )
+with an
+.B href
+attribute that does not specify a different web server)
+have their
+.B href
+attribute munged to insert the no-tables suffix.
+Thus the no-tables versions of a weeb of pages becomes a parallel web
+of no-tables pages.
+.PP
+There is one special case \-
+a link to some page ending in
+.B \-n.html
+whose content is
+.B "Text-only version"
+is replaced with a link to an address with the 
+.B \-n
+removed and content
+.BR "Fancy version" .
+.PP
+Finally, adjacent anchor or 
+.B strong
+elements have a bar
+.RB ( | )
+inserted between them.  This is aimed at converting "navigation bars"
+made from juxtaposed image links in to simple links with bars
+separating them.  For example:
+.IP
+.nf
+<p><a href="about.html"><img src="about.gif" alt="About"></a>
+    <strong><img src="products\-sel.gif" alt="Products"></strong>
+    <a href="news.html"><img src="news.gif" alt="News"></a>
+    <a href="links.html"><img src="links.gif" alt="Links"></a>
+</p>
+.fi
+.PP
+this gets translated into
+.IP
+.nf
+<p><a href="about\-n.html">About</a> |
+    <strong>Products</strong> |
+    <a href="news\-n.html">News</a> |
+    <a href="links\-n.html">Link</a>
+</p>
+.fi
+.PP
+The insertion of bars between the links is recommended by the Bobby 
+guidlelines for making pages accessible to people with dissabilities.
+.SH AUTHOR
+P. Damian Cugley
+.RI < pdc@alleged.demon.co.uk >
+.SH VERSION
+.de ID
+.ie \\n(.$>8 .ds FV 5.\\$3.1
+.el .ds FV 5.\\$3
+.ds FD \&\\$4
+..
+.ID $Id: notables.1,v 1.2 2001/01/26 22:59:32 pdc Exp $
+This is revision \*(FV of this manual page,
+last modified \*(FD.
+.SH "SEE ALSO"
+.BR thc (1),
+.BR thmkmf (1);
+.BR Tcl (n),
+.BR tclsh (1)
+.PP
+.I "Generating HTML files with TclHTML"
+(file
+.I tclhtml.html 
+in the documentation directory)
