@@ -1,0 +1,193 @@
+#!/bin/sh
+# -*-tcl-*- \
+exec #TCLSH# $0 ${1+"$@"}
+
+# thmkmf --
+#  Generate makefiles automatically for a typical TclHTML project.
+#  This works recursively, on the assumtpion that the source directory
+#  structure mirrors the directory structure of the target web site.
+
+set id {$Id: thmkmf.in,v 1.6 2004/03/22 23:36:49 pdc Exp $}
+if {[llength $id] < 7} {
+    set g(scriptVersion) 5.1.0
+} elseif {[llength $id] > 8} {
+    set g(scriptVersion) 5.[lindex $id 2].1
+} else {
+    set g(scriptVersion) 5.[lindex $id 2]
+    regsub -all / [lindex $id 3] - g(scriptDate)
+}
+if {![info exists g(scriptDate)]} {
+    set g(scriptDate) [clock format [file mtime [info script]] -format %Y-%m-%d]
+}
+
+# emit --
+#  Send the specified text to the output stream.
+proc emit {text} {
+    global out
+    puts $out $text
+}
+
+# log --
+#  Send the specified text to the user.
+proc log {text} {
+    puts stderr $text
+}
+
+# emitVar --
+#  Emit variable settings for the makefile.
+# Arguments --
+#  NAME VALUE ?NAME VALUE...?
+proc emitVar {args} {
+    foreach {var val} $args {
+	emit [format "%-16s= %s" $var $val]
+}   }
+
+
+set g(body) [string trim {
+htmlFiles	= $(inFiles:.th=.html)
+filesFiles	= $(inFiles:.th=.files)
+
+all:		$(htmlFiles)
+
+install:	$(htmlFiles)
+	for i in `cat $(filesFiles)`; do\
+	    $(INSTALL_HTML) $$i $(htmlDir)/$$i;\
+	done
+	for i in $(subDirs); do (cd $$i; $(MAKE) install); done
+
+subdirs:
+	for i in $(subDirs); do (cd $$i; $(MAKE) all subdirs); done
+
+clean:
+	rm -f `cat $(filesFiles)` $(filesFiles)
+	rm -f $(htmlFiles) img.data
+	for i in $(subDirs); do (cd $$i; $(MAKE) clean); done
+}]
+
+# generateMakefile --
+#  Generate the Makefile for this directory ...
+proc generateMakefiles {{subDir {}}} {
+    global g out
+
+    catch {
+	file rename Makefile Makefile.bak
+    }
+    set out [open [file join $subDir Makefile] w]
+
+    emit "## AUTOMATICALLY GENERATED ##"
+    emit "# [file join $subDir Makefile]: makefile for\
+	    [file join ROOTDIR $subDir *.html]"
+    emit "# Generated [clock format [clock seconds] -format %Y-%m-%d]\
+	    by [file tail [info script]] $g(scriptVersion) ($g(scriptDate))."
+    emit "# This makefile requires GNU make."
+    emit ""
+    emitVar THC #SCRIPTDIR#/thc\
+	    MAKE make SHELL /bin/sh\
+	    INSTALL_HTML "cp -p"
+    
+    emit ""
+    
+    set rDir {}
+    foreach elt [file split $subDir] {
+	append rDir ../
+    }
+    if {[set len [string length $rDir]] > 0} {
+	set rDir [string range $rDir 0 [expr $len - 2]]
+    }
+    if {[string compare $rDir ""] == 0} {
+	set rDir .
+    }
+    if {[string compare $subDir ""] == 0} {
+	set subDirOrDot .
+    } else {
+	set subDirOrDot $subDir
+    }
+ 	
+    emitVar srcRootDir $rDir\
+	    htmlRootDir $g(htmlRootDir)\
+	    subDir $subDirOrDot\
+	    htmlDir {$(htmlRootDir)/$(subDir)}
+    emit ""
+
+    set inFiles {}
+    foreach file [glob -nocomplain [file join $g(srcRootDir) $subDir *.th]] {
+	lappend inFiles [file tail $file]
+    }
+    emitVar inFiles [join $inFiles \\\n\t\t]
+
+    # find subdirs
+    set subDirs {}
+    foreach file [glob [file join $g(srcRootDir) $subDir *]] {
+	if {[file isdirectory $file]} {
+	    if {[regexp "^(CVS|RCS|SCCS)\$" [file tail $file]]} {
+		log "Skipping $file"
+		continue
+	    }
+	    lappend subDirs [file tail $file]
+	}
+    }
+    emitVar subDirs $subDirs
+    emit ""
+    emit "# Explicit rules"
+
+    emit $g(body)
+
+    emit ""
+    emit "# Implicit rules"
+    emit ".SUFFIXES:	.th .html\n"
+
+    set files {}
+    foreach file $g(scriptFiles) {
+	lappend files [file join $rDir $file]
+    }
+    
+    ##### emit "%.html: %.th tclhtml.conf\
+	    $files\n\t\$(THC) --subdir \$(subDir) --rootdir \$(srcRootDir) \$<\n"
+    emit ".th.html:\n\t\$(THC) \
+	    --html_root \$(htmlRootDir) --subdir \$(subDir) \$<\n"
+
+    if {[file exists [file join $subDir extra.mk]]} {
+	emit ""
+	emit "# Extra rules"
+	emit "include extra.mk"
+    }
+
+    close $out
+    log "Wrote makefile to [file join $subDir Makefile]"
+
+    foreach dir $subDirs {
+	generateMakefiles [file join $subDir $dir]
+    }
+}
+
+
+
+array set g {
+    srcRootDir .
+    htmlRootDir {$(HOME)/public_html/tclhtml.out}
+    scriptFiles {}
+}
+set out stdout
+set subDir {}
+
+foreach arg $argv {
+    if {[info exists var]} {
+	set $var $arg
+	unset var
+    } else {
+	switch -exact -- $arg {
+	    -s - --subdir {
+		set var subDir
+	    }
+	    -r - --html_root - --htmlroot {
+		set var g(htmlRootDir)
+	    }
+	    -i - --include {
+		set var g(scriptFiles)
+	    }
+	    default {
+		log "$arg: Unknown option"
+		exit 1
+}   }   }   }
+
+generateMakefiles

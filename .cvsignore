@@ -1,0 +1,9 @@
+*.files
+tmp.*
+thmkmf
+*.t
+Makefile
+img.data
+*.html
+config.status
+thc

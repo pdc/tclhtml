@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <!-- Generated from install.th on 2004-03-22 23:28 GMT -->
+  <!-- with command: cd /hda6/home/pdc/devel/tclhtml;
+  ./thc install.th -->
+  <!-- htmlProcs.tcl version 5.1.8 -->
+  <head>
+    <title>Installing TclHTML</title>
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+  </head>
+  <body bgcolor="#EEEEFF" text="#000000" link="#990000" vlink="#330000">
+    <h1>Installing TclHTML 5.1</h1>
+    <p>
+      Revision 5.1.1 (P. Damian Cugley, 2000-02-27),
+      for TclHTML version 5.1.
+    </p>
+    <p>
+      <a href="tclhtml.html">TclHTML</a> is a simple generator for HTML files,
+      designed for people who like Tcl.  It comprises
+      a new command <code>thc</code>
+      which converts <code>.th</code> files (written in Tcl) into HTML files.
+    </p>
+    <p>
+      The implementation is 100% pure Tcl, so no compilation as such is
+      required.  There is a <code>configure</code> script and Makefile which takes
+      care of generating the documentation, and copying its scripts and
+      library files in to the installation directories.
+    </p>
+    <h2>Configuration</h2>
+    <p>
+      The <code>configure</code> script is not generated with <code>autoconf</code>;
+      instead it is written in Tcl.  You should be able to run it with the command
+    </p>
+    <blockquote><code>./configure</code> ?<var>option</var>...?</blockquote>
+    <p>but if that does not work, invoke the Tcl shell explicity:</p>
+    <blockquote><code>tclsh ./configure</code> ?<var>option</var>...?</blockquote>
+    <p>
+      Since this package is 100% Tcl, there is
+      actually very little configuration to do.
+      The script writes a <code>config.status</code> script,
+      and then generates a makefile
+      from the template <code>Makefile.in</code>.
+      These options can be used to control configuration process:
+    </p>
+    <blockquote>
+      <dl>
+        <dt><code>--prefix=</code><var>dir</var></dt>
+        <dt><code>-p</code> <var>dir</var></dt>
+        <dd>Set the common prefix for the installation directories.</dd>
+        <dd>Default: <code>/usr/local</code>.</dd>
+        <p></p>
+        <dt><code>--datadir=</code><var>dir</var></dt>
+        <dt><code>-dd</code> <var>dir</var></dt>
+        <dd>
+          Set the directory in which the Tcl definition files for TclHTML
+          will be installed.  Usually you will want a subdirectory with a
+          package-specific name like
+          <code>tclhtml-5.1</code>, within
+          <code>/usr/local/lib</code> or similar.
+        </dd>
+        <dd>Default: <code>$prefix/lib/tclhtml-5.1</code></dd>
+        <p></p>
+        <dt><code>--scriptdir=</code><var>dir</var></dt>
+        <dt><code>-sd</code> <var>dir</var></dt>
+        <dd>
+          Set the directory where executable files that are not machine-specific
+          go -- such as Tcl scripts.
+        </dd>
+        <dd>Default: <code>$prefix/bin</code></dd>
+        <p></p>
+        <dt><code>--htmldir=</code><var>dir</var></dt>
+        <dt><code>-hd</code> <var>dir</var></dt>
+        <dd>A directory in which to place HTML documentation for this package.</dd>
+        <dd>Default: <code>$prefix/doc/tclhtml-5.1</code></dd>
+        <p></p>
+        <dt><code>--mandir=</code><var>dir</var></dt>
+        <dt><code>-md</code> <var>dir</var></dt>
+        <dd>A directory in which to place manual pages for this package.</dd>
+        <dd>Default: <code>$prefix/man</code></dd>
+        <p></p>
+        <dt><code>--install=</code><var>cmd</var></dt>
+        <dt><code>-i</code> <var>cmd</var></dt>
+        <dd>A generic command to use to install a file in a directory.</dd>
+        <dd>Default: <code>install -c</code></dd>
+        <p></p>
+        <dt><code>--install_script=</code><var>cmd</var></dt>
+        <dt><code>-is</code> <var>cmd</var></dt>
+        <dd>
+          A command to use to install an executable script file
+          in a directory.
+        </dd>
+        <dd>Default: <code>$INSTALL -m 755</code></dd>
+        <p></p>
+        <dt><code>--install_data=</code><var>cmd</var></dt>
+        <dt><code>-id</code> <var>cmd</var></dt>
+        <dd>
+          A command to use to install an non-executable data file
+          in a directory.
+        </dd>
+        <dd>Default: <code>$INSTALL -m 644</code></dd>
+        <p></p>
+        <dt><code>--nocreate</code></dt>
+        <dt><code>-n</code></dt>
+        <dd>
+          Do the configuration and create <code>config.status</code>,
+          but do not generate the makefile.
+        </dd>
+        <p></p>
+        <dt><code>--help</code></dt>
+        <dt><code>-h</code></dt>
+        <dt><code>-?</code></dt>
+        <dd>Print a short help message, and don't do configuration.</dd>
+        <p></p>
+        <dt><code>--version</code></dt>
+        <dt><code>-V</code></dt>
+        <dd>
+          Print the version number of the configure script,
+          and don't do configuration.
+        </dd>
+      </dl>
+    </blockquote>
+    <h2>Running make</h2>
+    <p>
+      The makefile implements several of the usual pseudo-targets, like
+      <code>all</code>, <code>clean</code>, and <code>install</code>.
+    </p>
+    <dl>
+      <dt><code>make all</code></dt>
+      <dd>
+        regenerates the HTML documentation for TclHTML.
+        With GNU <code>make</code>, this also checks if the configuration status file
+        has been changed and regenerates the makefile and so on.
+      </dd>
+      <p></p>
+      <dt><code>make install</code></dt>
+      <dd>
+        Copies the scripts and library files in to the appropriate directories.
+        You will need superuser priviledges if these are in system
+        directories like <code>/usr/local</code>.
+      </dd>
+      <p></p>
+      <dt><code>make uninstall</code></dt>
+      <dd>Deletes the files created with <code>make install</code>.</dd>
+    </dl>
+  </body>
+</html>
