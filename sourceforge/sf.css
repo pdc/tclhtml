@@ -1,0 +1,66 @@
+x {
+}
+
+body {
+	color:		#000000;
+	background-color: #F8F8F0;
+}
+
+h1 {
+	font-size:	24pt;
+}
+
+h1 .tcl {
+	font-family:	garamond, times, serif;
+	font-weight:	250;
+	font-style:	italic;
+}
+
+h1 .html {
+	font-family:	univers, helvetica, arial, sanserif;
+	font-weight:	750;
+	color:		#336666;
+}
+
+p.logo {
+	font-family:	garamond, times, serif;
+	font-size: 	14pt;
+	font-style:	italic;
+	font-weight:	250;
+	text-align:	right;
+	color:		#336666;
+}
+
+
+td.sfmenu {
+	color:		#000000;
+	background-color: #FFFFFF;
+}
+
+p.sflink {
+	font-family:	univers, helvetica, arial, sanserif;
+	font-weight:	400;
+	font-size:	9pt;
+	margin-top:	0pt;
+	margin-bottom:	0pt;
+}
+
+td.htmlmenu {
+	color:		#000000;
+	background-color: #FFFFFF;
+}
+
+p.htmlmenu {
+	margin-top:	0pt;
+	margin-bottom:	0pt;
+}
+
+td.tclmenu {
+	color:		#000000;
+	background-color: #FFFFFF;
+}
+
+p.tclmenu {
+	margin-top:	0pt;
+	margin-bottom:	0pt;
+}
