@@ -1,0 +1,163 @@
+ # install.th --						-*-tcl-*-
+#  Generator for install.html, the installion hints for TclHTML
+
+set id {$Id: install.th,v 1.1 2000/02/27 11:56:36 pdc Exp $}
+
+
+beginDocument bgcolor=#EEEEFF text=#000000 link=#990000 vlink=#330000 {
+    title "Installing TclHTML"
+}
+
+defaultAttrs tr align=left valign=baseline
+
+if {[llength $id] < 7} {
+    set fileVersion 5.1.0
+    set fileDate [clock format [file mtime [info script]] -format %Y-%m-%d]
+} else {
+    set fileVersion 5.[lindex $id 2]
+    regsub -all / [lindex $id 3] - fileDate
+    if {[llength $id] > 8} {
+	append fileVersion .1
+	set fileDate [clock format [file mtime [info script]] -format %Y-%m-%d]
+}   }
+regexp "^(\[0-9]+\\.\[0-9]+)\\." $fileVersion  dummy pkgVersion
+
+
+h1 "Installing TclHTML $pkgVersion"
+
+p "Revision $fileVersion (P. Damian Cugley, $fileDate), 
+for TclHTML version $pkgVersion."
+
+p "[a tclhtml.html TclHTML] is a simple generator for HTML files, 
+designed for people who like Tcl.  It comprises
+a new command [code thc]
+which converts [code .th] files (written in Tcl) into HTML files.
+"
+
+p "The implementation is 100% pure Tcl, so no compilation as such is
+required.  There is a [code configure] script and Makefile which takes
+care of generating the documentation, and copying its scripts and
+library files in to the installation directories."
+
+h2 "Configuration"
+
+p "The [code configure] script is not generated with [code autoconf];
+instead it is written in Tcl.  You should be able to run it with the command"
+
+blockquote "[code ./configure] ?[var option]...?"
+
+p "but if that does not work, invoke the Tcl shell explicity:"
+
+blockquote "[code tclsh ./configure] ?[var option]...?"
+
+p "Since this package is 100% Tcl, there is 
+actually very little configuration to do.
+The script writes a [code config.status] script,
+and then generates a makefile
+from the template [code Makefile.in].
+These options can be used to control configuration process:"
+
+blockquote* {
+    dl {
+    dt "[code --prefix=][var dir]"
+	dt "[code -p] [var dir]"
+	dd "Set the common prefix for the installation directories."
+	dd "Default: [code /usr/local]."
+
+	p
+	dt "[code --datadir=][var dir]"
+	dt "[code -dd] [var dir]"
+	dd "Set the directory in which the Tcl definition files for TclHTML
+	will be installed.  Usually you will want a subdirectory with a 
+	package-specific name like
+	[code tclhtml-$pkgVersion], within 
+	[code /usr/local/lib] or similar."  
+	dd "Default: [code \$prefix/lib/tclhtml-$pkgVersion]"
+
+	p
+	dt "[code --scriptdir=][var dir]"
+	dt "[code -sd] [var dir]"
+	dd "
+	Set the directory where executable files that are not machine-specific
+	go -- such as Tcl scripts."
+	dd "Default: [code \$prefix/bin]"
+
+	p
+	dt "[code --htmldir=][var dir]"
+	dt "[code -hd] [var dir]"
+	dd "
+	A directory in which to place HTML documentation for this package."
+	dd "Default: [code \$prefix/doc/tclhtml-$pkgVersion]"
+
+	p
+	dt "[code --mandir=][var dir]"
+	dt "[code -md] [var dir]"
+	dd "
+	A directory in which to place manual pages for this package."
+	dd "Default: [code \$prefix/man]"
+
+	p
+	dt "[code --install=][var cmd]"
+	dt "[code -i] [var cmd]"
+	dd "
+	A generic command to use to install a file in a directory."
+	dd "Default: [code install -c]"
+
+	p
+	dt "[code --install_script=][var cmd]"
+	dt "[code -is] [var cmd]"
+	dd "A command to use to install an executable script file 
+	in a directory."
+	dd "Default: [code \$INSTALL -m 755]"
+
+	p
+	dt "[code --install_data=][var cmd]"
+	dt "[code -id] [var cmd]"
+	dd "A command to use to install an non-executable data file 
+	in a directory."
+	dd "Default: [code \$INSTALL -m 644]
+	"
+
+	p
+	dt "[code --nocreate]"
+	dt "[code -n]"
+	dd "Do the configuration and create [code config.status],
+	but do not generate the makefile."
+
+	p
+	dt "[code --help]"
+	dt "[code -h]"
+	dt "[code -?]"
+	dd "Print a short help message, and don't do configuration."
+
+	p
+	dt "[code --version]"
+	dt "[code -V]"
+	dd "Print the version number of the configure script, 
+	and don't do configuration."
+}   }
+
+h2 "Running make"
+
+p "The makefile implements several of the usual pseudo-targets, like 
+[code all], [code clean], and [code install]."
+
+dl {
+    dt "[code make all]"
+    dd "regenerates the HTML documentation for TclHTML.
+    With GNU [code make], this also checks if the configuration status file
+    has been changed and regenerates the makefile and so on."
+
+    p
+    dt  "[code make install]"
+    dd "Copies the scripts and library files in to the appropriate directories.
+    You will need superuser priviledges if these are in system
+    directories like [code /usr/local]. "
+
+    p
+    dt "[code make uninstall]"
+    dd "Deletes the files created with [code make install]."
+}
+
+
+endDocument

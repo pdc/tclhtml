@@ -1,0 +1,112 @@
+
+
+			INSTALLING TCLHTML 5.1
+
+
+Revision 5.1.3 (P. Damian Cugley, 1999-04-25), for TclHTML version 5.1. 
+
+TclHTML is a simple generator for HTML files, designed for people who
+like Tcl. It comprises a new command thc which converts .th files
+(written in Tcl) into HTML files.
+
+The implementation is 100% pure Tcl, so no compilation as such is
+required. There is a configure script and Makefile which takes care of
+generating the documentation, and copying its scripts and library
+files in to the installation directories.
+
+
+CONFIGURATION
+
+The configure script is not generated with autoconf; instead it is
+written in Tcl. You should be able to run it with the command
+
+     ./configure ?option...?
+
+but if that does not work, invoke the Tcl shell explicity:
+
+     tclsh ./configure ?option...?
+
+Since this package is 100% Tcl, there is actually very little
+configuration to do. The script writes a config.status script, and
+then generates a makefile from the template Makefile.in. These options
+can be used to control configuration process:
+
+     --prefix=dir 
+     -p dir 
+          Set the common prefix for the installation directories. 
+          Default: /usr/local. 
+
+     --datadir=dir 
+     -dd dir 
+          Set the directory in which the Tcl definition files for
+          TclHTML will be installed. Usually you will want a
+          subdirectory with a package-specific name like tclhtml-5.1,
+          within /usr/local/lib or similar.  
+	  Default: $prefix/lib/tclhtml-5.1
+
+     --scriptdir=dir 
+     -sd dir 
+          Set the directory where executable files that are not
+          machine-specific go -- such as Tcl scripts.
+          Default: $prefix/bin 
+
+     --htmldir=dir 
+     -hd dir 
+          A directory in which to place HTML documentation for this package. 
+          Default: $prefix/doc/tclhtml-5.1 
+
+     --mandir=dir 
+     -md dir 
+          A directory in which to place manual pages for this package. 
+          Default: $prefix/man 
+
+     --install=cmd 
+     -i cmd 
+          A generic command to use to install a file in a directory. 
+          Default: install -c 
+
+     --install_script=cmd 
+     -is cmd 
+          A command to use to install an executable script file in a
+          directory.
+          Default: $INSTALL -m 755 
+
+     --install_data=cmd 
+     -id cmd 
+          A command to use to install an non-executable data file in a
+          directory.
+          Default: $INSTALL -m 644 
+
+     --nocreate 
+     -n 
+          Do the configuration and create config.status, but do not
+          generate the makefile.
+
+     --help 
+     -h 
+     -? 
+          Print a short help message, and don't do configuration. 
+
+     --version 
+     -V 
+          Print the version number of the configure script, and don't
+          do configuration.
+
+
+RUNNING MAKE
+
+The makefile implements several of the usual pseudo-targets, like all,
+clean, and install.
+
+make all 
+     regenerates the HTML documentation for TclHTML. With GNU make,
+     this also checks if the configuration status file has been
+     changed and regenerates the makefile and so on.
+
+make install 
+     Copies the scripts and library files in to the appropriate
+     directories. You will need superuser priviledges if these are in
+     system directories like /usr/local.
+
+make uninstall 
+     Deletes the files created with make install. 
