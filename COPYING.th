@@ -1,0 +1,53 @@
+# COPYING.th --						-*-tcl-*-
+#  Convert the COPYING file in to a HTML document.
+#  The aim is to leave the COPYING file untouched but
+#  to produce an HTML version from it.
+
+beginDocument {
+    title "GNU General Public License";	# we reproduce the American spelling
+    stylesheet COPYING.css
+}
+
+set in [open COPYING r]
+set text [read $in]
+close $in
+
+# Fix the indentaion of the quoted letter:
+regsub -all "\n  (Yoyodyne, Inc\\.|`Gnomovision' \\(which makes|<signature of Ty Coon|Ty Coon, President)" $text "\n    \\1" text
+
+# Take care of HTML characters:
+regsub -all & $text "\\&amp;" text
+regsub -all < $text "\\&lt;" text
+regsub -all > $text "\\&gt;" text
+
+# Take care of paragraphing:
+regsub -all "\f" $text "" text
+regsub -all "\n\n" $text "</p>&" text
+regsub -all "\n\n(\[^ \t])" $text "\n\n<p class=noindent>\\1" text
+regsub -all "\n\n (\[^ \t])" $text "\n\n<p class=copyright>\\1" text
+regsub -all "\n\n  (\[^ \t])" $text "\n\n<p class=indent>\\1" text
+
+# Itemized lists within clauses:
+regsub -all "\n\n    a\\) (\[^<>]*)</p>" $text \
+	"\n\n<ul>\n<li>a) \\1</li>" text
+regsub -all "\n\n    (\[a-z])\\) (\[^<>]*)</p>" $text \
+	"\n\n<li>\\1) \\2</li>" text
+regsub -all "</li>(\[ \t\n]*)<p" $text "</li>\n</ul>\\1<p" text
+regsub -all "\n\n    (\[^<>]*)</p>" $text \
+	"\n\n<blockquote>\\1</blockquote>" text
+
+# Take care of headings:
+regsub "^\[ \t]*(\[^\n]*)\n" $text "<h1>\\1</h1>\n" text
+regsub -all "\n\t\[ \t]*(\[^<>]*)</p>\n" $text "\n<h2>\\1</h2>\n" text
+regsub -all "<h2>(\[^\n<>]*)\n" $text "&<br>" text
+
+# Italicise metasyntactic stuff
+regsub -all "&lt;(\[^\\&<>\n]*)&gt;" $text "\\&lt;<em class=var>\\1</em>\\&gt;" text 
+
+# 
+regsub -all "(Ty Coon, President|Everyone is permitted to copy|Copyright \\(C\\) 19yy  &lt;|Gnomovision comes with|This is free software)" $text "<br>&" text
+
+
+emit $text
+
+endDocument

@@ -1,0 +1,70 @@
+.TH THC 1 "TclHTML 5.1" "$Date: 2000/02/27 11:43:44 $" "CONTRIBUTED COMMANDS"
+.SH NAME
+thc \- TclHTML compiler: convert files containing Tcl commands to HTML
+.SH SYNOPSIS
+.B thc
+.IR file.\|.\|.
+.SH DESCRIPTION
+.na
+.I thc
+is a simple processor for generating HTML documents 
+using the TclHTML 5.1 conventions.
+In TclHTML, Tcl commands are used to generate HTML tags,
+allowing you to use Tcl for macro processing.
+.PP
+This command works as follows.
+First it creates a Tcl interpreter, 
+and creates in that interpreter the Tcl commands specific to TclHTML.
+Then it reads in the files named in the command line as Tcl scripts.
+.PP
+The names of files used to generate HTML conventionally
+end in
+.BR .th ,
+but this is not compulsory.
+The files should contain one or more TclHTML document definition,
+starting with the command
+.B beginDocument
+and ending with 
+.B endDocument
+(or equivalent commands \- since Tcl is being used you are free to define
+whatever extra Tcl commands you like).
+.PP
+The HTML file generated will by default have its name formed
+from the input file name, minus the 
+.B .th
+suffix, with 
+.B .html
+added.
+For example,
+.I index.th
+is compiled to produce
+.IR index.html .
+.SH FILES
+.TP
+.I #DATADIR#
+This directory contains Tcl source files for the TclHTML commands.
+.TP
+.I #HTMLDIR#
+This directory contains documentation for TclHTML,
+in HTML format.
+.SH AUTHOR
+P. Damian Cugley
+.RI < pdc@alleged.demon.co.uk >
+.SH VERSION
+.de ID
+.ie \\n(.$>8 .ds FV 5.\\$3.1
+.el .ds FV 5.\\$3
+.ds FD \&\\$4
+..
+.ID $Id: thc.1.in,v 1.1 2000/02/27 11:43:44 pdc Exp $
+This is revision \*(FV of this manual page,
+last modified \*(FD.
+.SH "SEE ALSO"
+.BR notables (1);
+.BR Tcl (n),
+.BR tclsh (1)
+.PP
+.I "Generating HTML files with TclHTML"
+(file
+.I tclhtml.html 
+in the documentation directory)

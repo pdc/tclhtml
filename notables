@@ -1,0 +1,127 @@
+#!/bin/sh
+# -*-tcl-*- \
+	exec tclsh8.0 "$0" ${1+"$@"}
+
+# notables --
+#  Convert "fancy" HTML files into plain-text, no-tables versions.
+#  The converted files are written to files with names based on the
+#  input file:  the file BASE.html has no-tables version BASE-n.html .
+
+# The following hackery extracts the file version number from RCS:
+set id {$Id: notables,v 1.1 2000/02/27 11:42:29 pdc Exp $}
+if {[llength $id] < 7} {
+    set fileVersion 5.1.0
+    set fileDate [clock format [file mtime [info script]] -format %Y-%m-%d]
+} elseif {[llength $id] > 8} {
+    set fileVersion 5.[lindex $id 2].1
+    set fileDate [clock format [file mtime [info script]] -format %Y-%m-%d]
+} else {
+    set fileVersion 5.[lindex $id 2]
+    regsub / [lindex $id 3] -  fileDate
+}
+regexp "^\[0-9]*\\.\[0-9]*" $fileVersion pkgVersion
+
+# log --
+#  Emit a message to stdout or the equivalent.
+proc log {text} {
+    puts stderr $text
+}
+
+# processFile --
+#  Open the file named inName, read its contents, 
+#  and write a file outName
+proc processFile {inName {outName stdout}} {
+    global opt
+    log $inName:
+    set in [open $inName r]
+    set text [read $in]
+    close $in
+
+    regsub -all "</?(area|font|tr|td|th|table|caption|layer)\[^<>]*>" $text "" text
+    regsub -all "<img \[^<>]*alt=\"(\[^\"]*)\"\[^<>]*>" $text "\\1" text
+    regsub -all "<img \[^<>]*alt=(\[^ \t\n<>\"]*)\[^<>]*>" $text "\\1" text
+    regsub -all "<hr \[^<>]*title=\"(\[^\"]*)\"\[^<>]*>" $text "<h3>\\1</h3>" text
+
+    regsub -all "\\&nbsp;" $text " " text
+    regsub -all "\n\[ \t\n]*\n\[ \t\n]*" $text \n\n text
+    regsub -all "(<a \[^<>]*href=\"\[^:\"]*)(.html\"\[^<>]*>)" $text \
+	    "\\1-n\\2" text
+    regsub "<a href=\"(\[^\"]*)-n-n.html\">Text-only version</a>" $text \
+	    "<a href=\"\\1.html\">Fancy version</a>" text
+    regsub -all "</small>\[ \t\r\n]*<small>" $text " " text
+    regsub -all "(</a>|</strong>)(\[ \t\r\n]*(<a |<strong>))" $text "\\1 |\\2" text
+
+    if {[string compare stdout $outName] == 0} {
+	set out $outName
+    } else {
+	set out [open $outName w]
+    }
+    puts $out $text
+    if {![string match std* $out]} {
+	close $out
+    }
+    log "HTML written to $outName."
+}
+
+
+# processDir -- 
+#  Apply processFile to each HTML file in DIR.
+proc processDir {dir} {
+    puts stderr "notables $dir:"
+    foreach f [glob -nocomplain [file join $dir *]] {
+	if {[file isdirectory $f]} {
+	    processDir $f
+	} elseif {[string match *.html $f] && ![string match *-n.html $f]} {
+	    set fn [file rootname $f]-n.html
+	    #if {![file exists $fn] || [file mtime $fn] < [file mtime $f]} {
+		processFile $f $fn
+	    #}
+	}
+    }
+}
+
+
+# process the arguments
+
+set outFile stdout
+foreach arg $argv {
+    switch -exact -- $arg {
+	--version - -V - -v {
+	    puts "This is notables version $fileVersion ($fileDate)."
+	    puts "It is a component of TclHTML $pkgVersion."
+	    set ok 1
+	}
+	--help - -h - -? {
+	    puts "notables --
+    Strip tables and other elements from HTML files, leaving plain text
+    versions.
+
+Usage
+    notables [ OPTION... ] ( FILE | DIRECTORY )...
+
+    If no files are listed then all files in the current directory
+    and all its subdirectories are processed.
+
+Options
+    --help,  -h
+	Print this message.
+    --version,  -V
+	Print the version number."
+	    set ok 1
+	}
+	--filter - -f {
+	    set filter 1
+	}
+	default {
+	    if {[info exists filter]} {
+		processFile $arg stdout
+	    } else {
+		set fn [file rootname $arg]-n.html
+		processFile $arg $fn
+	    }
+	    set ok 1
+}   }   }
+
+if {![info exists ok]} {
+    processDir .
+}
