@@ -23,8 +23,10 @@ if {![info exists g(scriptDate)]} {
 # emit --
 #  Send the specified text to the output stream.
 proc emit {text} {
-    global out
-    puts $out $text
+    global out isDryRun
+    if {! $isDryRun} {
+        puts $out $text
+    }
 }
 
 # log --
@@ -33,98 +35,118 @@ proc log {text} {
     puts stderr $text
 }
 
+
+# checkMakefileOverwritable --
+#  Check whether it is OK to write a Makefile in this directory.
+proc checkMakefileOverwritable {fileName} {
+    if {! [file exists $fileName]} {
+        return 1
+    }
+    set strm [open $fileName r]
+    set text [read $fileName 1024]
+    if {[regexp "automatically generated" $text]} {
+        return 1
+    }
+    log "$fileName: will not overwrite existing file"
+    return 0
+}
+
+
+
 # emitVar --
 #  Emit variable settings for the makefile.
 # Arguments --
 #  NAME VALUE ?NAME VALUE...?
 proc emitVar {args} {
     foreach {var val} $args {
-	emit [format "%-16s= %s" $var $val]
+    emit [format "%-16s= %s" $var $val]
 }   }
 
 
-set g(body) [string trim {
-htmlFiles	= $(inFiles:.th=.html)
-filesFiles	= $(inFiles:.th=.files)
+set g(body) [string trim "
+htmlFiles   = \$(inFiles:.th=.html)
+filesFiles  = \$(inFiles:.th=.files)
 
-all:		$(htmlFiles)
+all:        \$(htmlFiles)
 
-install:	$(htmlFiles)
-	for i in `cat $(filesFiles)`; do\
-	    $(INSTALL_HTML) $$i $(htmlDir)/$$i;\
-	done
-	for i in $(subDirs); do (cd $$i; $(MAKE) install); done
+install:\t\$(htmlFiles)
+\tfor i in `cat \$(filesFiles)`; do\\
+\t\t\$(INSTALL_HTML) \$\$i \$(htmlDir)/\$\$i;\\
+\tdone
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) install); done
 
 subdirs:
-	for i in $(subDirs); do (cd $$i; $(MAKE) all subdirs); done
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) all subdirs); done
 
 clean:
-	rm -f `cat $(filesFiles)` $(filesFiles)
-	rm -f $(htmlFiles) img.data
-	for i in $(subDirs); do (cd $$i; $(MAKE) clean); done
-}]
+\trm -f `cat \$(filesFiles)` \$(filesFiles)
+\trm -f \$(htmlFiles) img.data
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) clean); done
+"]
 
 # generateMakefile --
 #  Generate the Makefile for this directory ...
 proc generateMakefiles {{subDir {}}} {
-    global g out
+    global g out isDryRun
 
-    catch {
-	file rename Makefile Makefile.bak
+    if {!$isDryRun} {
+        catch {
+            file rename Makefile Makefile.bak
+        }
+        set out [open [file join $subDir Makefile] w]
     }
-    set out [open [file join $subDir Makefile] w]
 
     emit "## AUTOMATICALLY GENERATED ##"
     emit "# [file join $subDir Makefile]: makefile for\
-	    [file join ROOTDIR $subDir *.html]"
+        [file join ROOTDIR $subDir *.html]"
     emit "# Generated [clock format [clock seconds] -format %Y-%m-%d]\
-	    by [file tail [info script]] $g(scriptVersion) ($g(scriptDate))."
+        by [file tail [info script]] $g(scriptVersion) ($g(scriptDate))."
     emit "# This makefile requires GNU make."
     emit ""
     emitVar THC #SCRIPTDIR#/thc\
-	    MAKE make SHELL /bin/sh\
-	    INSTALL_HTML "cp -p"
-    
+        MAKE make SHELL /bin/sh\
+        INSTALL_HTML "cp -p"
+
     emit ""
-    
+
     set rDir {}
     foreach elt [file split $subDir] {
-	append rDir ../
+        append rDir ../
     }
     if {[set len [string length $rDir]] > 0} {
-	set rDir [string range $rDir 0 [expr $len - 2]]
+        set rDir [string range $rDir 0 [expr $len - 2]]
     }
     if {[string compare $rDir ""] == 0} {
-	set rDir .
+        set rDir .
     }
     if {[string compare $subDir ""] == 0} {
-	set subDirOrDot .
+        set subDirOrDot .
     } else {
-	set subDirOrDot $subDir
+        set subDirOrDot $subDir
     }
- 	
+
     emitVar srcRootDir $rDir\
-	    htmlRootDir $g(htmlRootDir)\
-	    subDir $subDirOrDot\
-	    htmlDir {$(htmlRootDir)/$(subDir)}
+        htmlRootDir $g(htmlRootDir)\
+        subDir $subDirOrDot\
+        htmlDir {$(htmlRootDir)/$(subDir)}
     emit ""
 
     set inFiles {}
     foreach file [glob -nocomplain [file join $g(srcRootDir) $subDir *.th]] {
-	lappend inFiles [file tail $file]
+        lappend inFiles [file tail $file]
     }
     emitVar inFiles [join $inFiles \\\n\t\t]
 
     # find subdirs
     set subDirs {}
     foreach file [glob [file join $g(srcRootDir) $subDir *]] {
-	if {[file isdirectory $file]} {
-	    if {[regexp "^(CVS|RCS|SCCS)\$" [file tail $file]]} {
-		log "Skipping $file"
-		continue
-	    }
-	    lappend subDirs [file tail $file]
-	}
+        if {[file isdirectory $file]} {
+            if {[regexp "^(CVS|RCS|SCCS)\$" [file tail $file]]} {
+                log "Skipping $file"
+                continue
+            }
+            lappend subDirs [file tail $file]
+        }
     }
     emitVar subDirs $subDirs
     emit ""
@@ -134,32 +156,35 @@ proc generateMakefiles {{subDir {}}} {
 
     emit ""
     emit "# Implicit rules"
-    emit ".SUFFIXES:	.th .html\n"
+    emit ".SUFFIXES:    .th .html\n"
 
     set files {}
     foreach file $g(scriptFiles) {
-	lappend files [file join $rDir $file]
+        lappend files [file join $rDir $file]
     }
-    
+
     ##### emit "%.html: %.th tclhtml.conf\
-	    $files\n\t\$(THC) --subdir \$(subDir) --rootdir \$(srcRootDir) \$<\n"
+        $files\n\t\$(THC) --subdir \$(subDir) --rootdir \$(srcRootDir) \$<\n"
     emit ".th.html:\n\t\$(THC) \
-	    --html_root \$(htmlRootDir) --subdir \$(subDir) \$<\n"
+        --html_root \$(htmlRootDir) --subdir \$(subDir) \$<\n"
 
     if {[file exists [file join $subDir extra.mk]]} {
-	emit ""
-	emit "# Extra rules"
-	emit "include extra.mk"
+        emit ""
+        emit "# Extra rules"
+        emit "include extra.mk"
     }
 
-    close $out
-    log "Wrote makefile to [file join $subDir Makefile]"
+    if {!$isDryRun} {
+        close $out
+        log "Wrote makefile to [file join $subDir Makefile]"
+    } else {
+        log "Would write [file join $subDir Makefile]"
+    }
 
     foreach dir $subDirs {
-	generateMakefiles [file join $subDir $dir]
+        generateMakefiles [file join $subDir $dir]
     }
 }
-
 
 
 array set g {
@@ -167,27 +192,27 @@ array set g {
     htmlRootDir {$(HOME)/public_html/tclhtml.out}
     scriptFiles {}
 }
+set isDryRun 0
 set out stdout
-set subDir {}
 
 foreach arg $argv {
     if {[info exists var]} {
-	set $var $arg
-	unset var
+        set $var $arg
+        unset var
     } else {
-	switch -exact -- $arg {
-	    -s - --subdir {
-		set var subDir
-	    }
-	    -r - --html_root - --htmlroot {
-		set var g(htmlRootDir)
-	    }
-	    -i - --include {
-		set var g(scriptFiles)
-	    }
-	    default {
-		log "$arg: Unknown option"
-		exit 1
+    switch -exact -- $arg {
+        -r - --html_root - --htmlroot {
+            set var g(htmlRootDir)
+        }
+        -i - --include {
+           set var g(scriptFiles)
+        }
+        -n - --dry-run - --dryrun {
+                set isDryRun 1
+        }
+        default {
+            log "$arg: Unknown option"
+            exit 1
 }   }   }   }
 
 generateMakefiles
