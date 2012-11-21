@@ -1,6 +1,6 @@
 TclHTML -- Generate HTML files using Tcl scripts
 
-DESCRTIPTION
+DESCRIPTION
 
     This is a package for generating collections of HTML pages using
     scripts written in the Tool Command Language (Tcl).  It includes:
@@ -8,7 +8,7 @@ DESCRTIPTION
 	`thc', a command for compiling TclHTML scripts (`.th' files),
 
 	`notables', a script for stripping tables and other non-text tags from
-	    HTML files, and 
+	    HTML files, and
 
 	`thmkmf', a Makefile generator for directory trees of `.th' files.
 
@@ -16,6 +16,14 @@ DESCRTIPTION
     documentation is in HTML format, on the assumption that if you are
     interested in an HTML generator you have access to an HTML
     reader...
+
+
+CAVEAT
+
+    This seemed like a good idea in 1999.
+    Better HTML-templating solutions now exist.
+    I am keeping this package alive to support old web sites
+    that still need it.
 
 
 INSTALLATION
@@ -32,13 +40,13 @@ INSTALLATION
 
 AUTHOR
 
-    P. Damian Cugley <damian@alleged.demon.co.uk>
-    http://www.alleged.demon.co.uk/
+    Damian Cugley
+    <http://alleged.org.uk/pdc/>
 
 
 COPYING
 
-    Copyright � 1999 P. Damian Cugley
+    Copyright © 1999–2012 Peter Damian Cugley
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
