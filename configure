@@ -1,0 +1,204 @@
+#!/bin/sh
+# This script runs in tclsh...         -*-tcl-*- \
+	exec tclsh "$0" ${1+"$@"}
+
+# $Id: configure,v 1.2 2000/03/03 20:34:51 pdc Exp $
+# configure --
+#  This is a configuration script for TclHTML.
+
+# Read package version from file VERSION
+set in [open "VERSION" r]
+set pkgVersion [string trim [read $in]]
+close $in
+
+set helpText {configure -- Configuration script for the TclHTML system.
+
+Usage:
+  tclsh configure ?OPTION...?
+
+Options (NB. the long forms cannot be abbreviated):
+  --prefix=DIR, -p DIR 
+	set the common root directory for installation
+  --datadir=DIR, -dd DIR 
+	set the directory for machine-independent 
+	data files; default $prefix/lib/tclhtml
+  --scriptdir=DIR, -sd DIR
+	set the directory for machine-independent scripts
+  --htmldir=DIR, -hd DIR
+	set the directory where HTML documentation will go
+  --mandir=DIR, -md DIR
+	set the directory for manual pages
+  --man1dir=DIR, -m1d DIR
+	set the directory for section-1 manual pages (commands)
+  --man5dir=DIR, -m5d DIR
+	set the directory for section-5 manual pages (file formats)
+  --tclsh=VER, -t VER
+	set the version of Tcl Shell command to use
+  --version, -V 
+	print the version number and exit
+  --help, -h
+	print this help text and exit
+}
+
+# set defaults
+array set opts {
+    prefix /usr/local
+    scriptdir $(prefix)/bin
+    mandir $(prefix)/man
+    man1dir $(mandir)/man1
+    man5dir $(mandir)/man5
+    install {install -c}
+    install_script {$(INSTALL) -m 755}
+    install_data {$(INSTALL) -m 644}
+}
+set opts(datadir) \$(prefix)/lib/tclhtml-$pkgVersion
+set opts(htmldir) \$(prefix)/doc/tclhtml-$pkgVersion
+set opts(version) $pkgVersion
+set opts(tclsh) tclsh[info tclversion]
+
+# Scan the args
+foreach arg $argv {
+    if {[info exists opt]} {
+	set opts($opt) $arg
+	unset opt
+    } else {
+	switch -glob -- $arg {
+	    --prefix=* - -prefix=* -
+	    --datadir=* - -datadir=* -
+	    --scriptdir=* - -scriptdir=* -
+	    --mandir=* - -mandir=* -
+	    --man1dir=* - -man1dir=* -
+	    --man5dir=* - -man5dir=* -
+	    --htmldir=* - -htmldir=* -
+	    --install=* - install=* -
+	    --install_script=* - -install_script=* -
+	    --install_data=* - -install_data=* -
+	    --tclsh= - -tclsh= {
+		regexp "^-?-(.*)=(.*)\$" $arg  dummy key val
+		set opts($key) $val
+	    }
+	    --prefix - -prefix - -p {
+		set opt prefix
+	    }
+	    --datadir - -datadir - -dd {
+		set opt datadir
+	    }
+	    --scriptdir - -scriptdir - -sd {
+		set opt scriptdir
+	    }
+	    --htmldir - -htmldir - -hd {
+		set opt htmldir
+	    }
+	    --mandir - -mandir - -md {
+		set opt mandir
+	    }
+	    --man1dir - -man1dir - -m1d {
+		set opt man1dir
+	    }
+	    --man5dir - -man5dir - -m5d {
+		set opt man5dir
+	    }
+	    --install - -install - -i {
+		set opt install
+	    }
+	    --install_script - -install_script - -is {
+		set opt install_script
+	    }
+	    --install_data - -install_data - -id {
+		set opt install_data
+	    }
+	    --tclsh - -tclsh - t {
+		set opt tclsh
+	    }
+	    --help - -help - -h {
+		puts $helpText
+		set helpVersion 1
+	    }
+	    --nocreate - -nocreate - -n {
+		set dryrun 1
+	    }
+	    --version - -version - -V {
+		puts "This is configure for TclHTML $pkgVersion."
+		set helpVersion 1
+	    }
+	    default {
+		puts stderr "Did not understand $arg; ignoring it"
+	    }
+}   }   }
+
+if {[info exists helpVersion]} {
+    exit 0
+}
+
+
+set out [open config.status w]
+puts $out "#!/bin/sh
+# Run this script in Tcl     -*-tcl-*- \\
+	exec tclsh \"\$0\" \${1+\"\$@\"}
+
+# config.status --
+#  A record of the `configure' settings for TclHTML.
+#  Run this script to regenerate the Makefile from Makefile.in.
+
+
+switch -- \[lindex \$argv 0] {
+    --rerun - --refresh - -r {
+	puts \"Rerunning ./configure\"
+	exec tclsh ./configure [join $argv " "] \[lrange \$argv 1 end]\
+		>@stdout 2>@stderr
+	exit 0
+    }
+    --version - -V {
+	puts \"This is config.status, created by configure \
+		for TclHTML $pkgVersion on\
+		[clock format [clock seconds] -format "%Y-%m-%d %H:%M"].\"
+	set helpVersion 1
+    }
+    --help - -h - -? {
+	puts \"Usage:\"
+	puts \"    tclsh config.status ?FILE...?\t\t-- generate file(s)\"
+	puts \"    tclsh config.status -r ?ARG...?\t\t-- rerun ./configure\"
+	puts \"    tclsh config.status --help | --version\"
+	set helpVersion 1
+    }
+}
+if {\[info exists helpVersion]} {
+    exit 0
+}
+
+"
+
+foreach name [lsort [array names opts]] {
+    puts $out "set subs($name) {$opts($name)}"
+}
+
+puts $out {
+
+set files {Makefile}
+if {[llength $argv] > 0} {
+    set files $argv
+}
+
+foreach file $files {
+    puts -nonewline "Writing $file: "
+    set in [open $file.in r]
+    set out [open $file w]
+    while {[gets $in line] >= 0} {
+	foreach pat [array names subs] {
+	    regsub -all @[string toupper $pat]@ $line $subs($pat) line
+	    regsub "\\.in -- generator for (.*)\$" $line " -- \\1 (generated from $file.in)" line
+	}
+	puts $out $line 
+    }
+    close $out
+    close $in
+    puts ""
+}
+}
+
+close $out
+puts "Wrote configuration status to config.status."
+
+if {![info exists dryrun]} {
+    exec tclsh config.status >@stdout 2>@stderr
+}
