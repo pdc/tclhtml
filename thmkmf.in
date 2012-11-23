@@ -67,9 +67,10 @@ set g(body) [string trim "
 htmlFiles   = \$(inFiles:.th=.html)
 filesFiles  = \$(inFiles:.th=.files)
 
-all:        \$(htmlFiles)
+all:        \$(htmlFiles) subdirs
 
 install:\t\$(htmlFiles)
+\tmkdir -p \$(htmlDir)
 \tfor i in `cat \$(filesFiles)`; do\\
 \t\t\$(INSTALL_HTML) \$\$i \$(htmlDir)/\$\$i;\\
 \tdone
@@ -83,6 +84,19 @@ clean:
 \trm -f \$(htmlFiles) img.data
 \tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) clean); done
 "]
+set g(bodySansThFiles) [string trim "
+all:        subdirs
+
+install:\t
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) install); done
+
+subdirs:
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) all subdirs); done
+
+clean:
+\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) clean); done
+"]
+
 
 # generateMakefile --
 #  Generate the Makefile for this directory ...
@@ -128,7 +142,7 @@ proc generateMakefiles {{subDir {}}} {
     emitVar srcRootDir $rDir\
         htmlRootDir $g(htmlRootDir)\
         subDir $subDirOrDot\
-        htmlDir {$(htmlRootDir)/$(subDir)}
+        htmlDir {$(srcRootDir)/$(htmlRootDir)/$(subDir)}
     emit ""
 
     set inFiles {}
@@ -152,7 +166,11 @@ proc generateMakefiles {{subDir {}}} {
     emit ""
     emit "# Explicit rules"
 
-    emit $g(body)
+    if {[llength $inFiles] > 0} {
+        emit $g(body)
+    } else {
+        emit $g(bodySansThFiles)
+    }
 
     emit ""
     emit "# Implicit rules"
