@@ -63,7 +63,7 @@ proc emitVar {args} {
 }   }
 
 
-set g(body) [string trim "
+set g(bodyWithSubdirs) [string trim "
 htmlFiles   = \$(inFiles:.th=.html)
 filesFiles  = \$(inFiles:.th=.files)
 
@@ -74,45 +74,116 @@ install:\t\$(htmlFiles)
 \tfor i in `cat \$(filesFiles)`; do\\
 \t\t\$(INSTALL_HTML) \$\$i \$(htmlDir)/\$\$i;\\
 \tdone
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) install); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) install); done
 
 subdirs:
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) all subdirs); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) all); done
 
 clean:
 \trm -f `cat \$(filesFiles)` \$(filesFiles)
 \trm -f \$(htmlFiles) img.data
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) clean); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) clean); done
 "]
+
+set g(bodySansSubdirs) [string trim "
+htmlFiles   = \$(inFiles:.th=.html)
+filesFiles  = \$(inFiles:.th=.files)
+
+all:        \$(htmlFiles)
+
+install:\t\$(htmlFiles)
+\tmkdir -p \$(htmlDir)
+\tfor i in `cat \$(filesFiles)`; do\\
+\t\t\$(INSTALL_HTML) \$\$i \$(htmlDir)/\$\$i;\\
+\tdone
+
+clean:
+\trm -f `cat \$(filesFiles)` \$(filesFiles)
+\trm -f \$(htmlFiles) img.data
+"]
+
 set g(bodySansThFiles) [string trim "
 all:        subdirs
 
 install:\t
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) install); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) install); done
 
 subdirs:
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) all subdirs); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) all); done
 
 clean:
-\tfor i in \$(subDirs); do (cd \$\$i; \$(MAKE) clean); done
+\tfor i in \$(subdirs); do (cd \$\$i; \$(MAKE) clean); done
 "]
 
 
 # generateMakefile --
-#  Generate the Makefile for this directory ...
-proc generateMakefiles {{subDir {}}} {
+#     Generate the Makefile for this directory .
+# Arguments --
+#     pathFromRoot -- path to this directory relative to the root directory
+# Returns --
+#     Nonzero iff a makefile was created.
+#     Zero if no makefile is required because no TclHTML files.
+proc generateMakefiles {{pathFromRoot {}}} {
     global g out isDryRun
+
+    set rDir {}
+    foreach elt [file split $pathFromRoot] {
+        append rDir ../
+    }
+    if {[set len [string length $rDir]] > 0} {
+        set rDir [string range $rDir 0 [expr $len - 2]]
+    }
+    if {[string compare $rDir ""] == 0} {
+        set rDir .
+    }
+    if {[string compare $pathFromRoot ""] == 0} {
+        set pathFromRootOrDot .
+    } else {
+        set pathFromRootOrDot $pathFromRoot
+    }
+
+    # Find subdirs of this directory
+    set subdirs {}
+    foreach file [glob -nocomplain [file join $g(srcRootDir) $pathFromRoot *]] {
+        if {[file isdirectory $file]} {
+            if {[regexp "^(CVS|RCS|SCCS)\$" [file tail $file]]} {
+                log "Skipping $file"
+                continue
+            }
+
+            # See if this subdir gets a Makefile.
+            set subdir [file tail $file]
+            if {[generateMakefiles [file join $pathFromRoot $subdir]]} {
+                lappend subdirs $subdir
+            }
+        }
+    }
+
+    set inFiles {}
+    foreach file [glob -nocomplain [file join $g(srcRootDir) $pathFromRoot *.th]] {
+        lappend inFiles [file tail $file]
+    }
+
+    set files {}
+    foreach file $g(scriptFiles) {
+        lappend files [file join $rDir $file]
+    }
+
+    if {[llength $inFiles] == 0 && [llength $subdirs] == 0} {
+        log "${pathFromRoot}: No subdirs and no TclHTML files so no Makefile required"
+        return 0
+    }
 
     if {!$isDryRun} {
         catch {
             file rename Makefile Makefile.bak
         }
-        set out [open [file join $subDir Makefile] w]
+        set out [open [file join $pathFromRoot Makefile] w]
     }
 
     emit "## AUTOMATICALLY GENERATED ##"
-    emit "# [file join $subDir Makefile]: makefile for\
-        [file join ROOTDIR $subDir *.html]"
+    emit "# [file join $pathFromRoot Makefile]: makefile for\
+        [file join ROOTDIR $pathFromRoot *.html]"
     emit "# Generated [clock format [clock seconds] -format %Y-%m-%d]\
         by [file tail [info script]] $g(scriptVersion) ($g(scriptDate))."
     emit "# This makefile requires GNU make."
@@ -123,70 +194,39 @@ proc generateMakefiles {{subDir {}}} {
 
     emit ""
 
-    set rDir {}
-    foreach elt [file split $subDir] {
-        append rDir ../
-    }
-    if {[set len [string length $rDir]] > 0} {
-        set rDir [string range $rDir 0 [expr $len - 2]]
-    }
-    if {[string compare $rDir ""] == 0} {
-        set rDir .
-    }
-    if {[string compare $subDir ""] == 0} {
-        set subDirOrDot .
-    } else {
-        set subDirOrDot $subDir
-    }
-
     emitVar srcRootDir $rDir\
         htmlRootDir $g(htmlRootDir)\
-        subDir $subDirOrDot\
-        htmlDir {$(srcRootDir)/$(htmlRootDir)/$(subDir)}
+        pathFromRoot $pathFromRootOrDot\
+        htmlDir {$(srcRootDir)/$(htmlRootDir)/$(pathFromRoot)}
     emit ""
 
-    set inFiles {}
-    foreach file [glob -nocomplain [file join $g(srcRootDir) $subDir *.th]] {
-        lappend inFiles [file tail $file]
+    if {[llength $inFiles]} {
+        emitVar inFiles [join $inFiles \\\n\t\t]
     }
-    emitVar inFiles [join $inFiles \\\n\t\t]
-
-    # find subdirs
-    set subDirs {}
-    foreach file [glob [file join $g(srcRootDir) $subDir *]] {
-        if {[file isdirectory $file]} {
-            if {[regexp "^(CVS|RCS|SCCS)\$" [file tail $file]]} {
-                log "Skipping $file"
-                continue
-            }
-            lappend subDirs [file tail $file]
-        }
+    if {[llength $subdirs]} {
+        emitVar subdirs $subdirs
     }
-    emitVar subDirs $subDirs
     emit ""
     emit "# Explicit rules"
 
-    if {[llength $inFiles] > 0} {
+    if {[llength $inFiles] && [llength $subdirs]} {
         emit $g(body)
-    } else {
+    } elseif {[llength $subdirs]} {
         emit $g(bodySansThFiles)
+    } else {
+        emit $g(bodySansSubdirs)
     }
 
     emit ""
     emit "# Implicit rules"
     emit ".SUFFIXES:    .th .html\n"
 
-    set files {}
-    foreach file $g(scriptFiles) {
-        lappend files [file join $rDir $file]
-    }
-
     ##### emit "%.html: %.th tclhtml.conf\
-        $files\n\t\$(THC) --subdir \$(subDir) --rootdir \$(srcRootDir) \$<\n"
+        $files\n\t\$(THC) --subdir \$(pathFromRoot) --rootdir \$(srcRootDir) \$<\n"
     emit ".th.html:\n\t\$(THC) \
-        --html_root \$(htmlRootDir) --subdir \$(subDir) \$<\n"
+        --html_root \$(htmlRootDir) --subdir \$(pathFromRoot) \$<\n"
 
-    if {[file exists [file join $subDir extra.mk]]} {
+    if {[file exists [file join $pathFromRoot extra.mk]]} {
         emit ""
         emit "# Extra rules"
         emit "include extra.mk"
@@ -194,14 +234,13 @@ proc generateMakefiles {{subDir {}}} {
 
     if {!$isDryRun} {
         close $out
-        log "Wrote makefile to [file join $subDir Makefile]"
+        log "Wrote makefile to [file join $pathFromRoot Makefile]"
     } else {
-        log "Would write [file join $subDir Makefile]"
+        log "Would write [file join $pathFromRoot Makefile]"
     }
 
-    foreach dir $subDirs {
-        generateMakefiles [file join $subDir $dir]
-    }
+
+    return 1
 }
 
 
