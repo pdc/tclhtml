@@ -613,7 +613,8 @@ proc html::img {src args} {
         if {![info exists widths($src)]} {
             foreach dir [list $opts(htmlRootDir) ""] {
                 set imgFile [file nativename \
-                        [file join $opts(rootDir) $dir $opts(pathFromRoot) $src]]
+                        [file normalize \
+                            [file join $opts(rootDir) $dir $opts(pathFromRoot) $src]]]
                 if {[file exists $imgFile]} {
                     break
                 }
