@@ -125,10 +125,10 @@ proc diptych {script} {
 		td*  {
 		    pre -encode [resultOf $script]
 	}   }   }
-}   }   
+}   }
 
 # ix --
-#  Return the text, marked 
+#  Return the text, marked
 proc ix {id {text {}}} {
     global ixes
     if {"$text" == ""} {
@@ -188,7 +188,7 @@ table align=right hspace=8 border=0 cellpadding=0 cellpspacing=0 {
 	    table border=0 cellspacing=1 cellpadding=8 {
 		tr {
 		    td* bgcolor=$bgColor {
-	
+
 			p [strong Contents]
 
 			dl {
@@ -245,8 +245,8 @@ ul {
 }
 
 p "I chose Tcl (John Ousterhout's Tool Command Language)
-as the basis for my system because it is the scripting language 
-I'm most familiar with, and because I was inspired by 
+as the basis for my system because it is the scripting language
+I'm most familiar with, and because I was inspired by
 Don Libes's approach to using Tcl to deliver CGI pages.
 "
 
@@ -258,12 +258,12 @@ got tired of its appearance, I wrote new procs which generated
 completely new layouts, thus changing all the pages on the site by
 altering one file."
 
-p "As another little example, the revision number for this document 
+p "As another little example, the revision number for this document
 is extracted from the RCS id embedded in the script generating this HTML page.
-At the start of the file some Tcl code 
+At the start of the file some Tcl code
 (described later) extracts the file version and
 last-changed date in to Tcl variables [code fileVersion]
-and [code fileDate].  
+and [code fileDate].
 Later in the script there are these two lines:
 "
 
@@ -287,7 +287,7 @@ This is the first version of the TclHTML manual.
 ########################################################################
 subsection "Version numbers"
 
-p "The version of Tcl HTML is $pkgVersion.  
+p "The version of Tcl HTML is $pkgVersion.
 The major version is 5 because I've had several goes at HTML generation
 in the past (none of which I have published in their own right).
 The plan is that this will be incremented in future when I make
@@ -355,9 +355,9 @@ blockquote* {
 }
 close $in
 
-p "There aren't any hard-and-fast rules for the contents of 
+p "There aren't any hard-and-fast rules for the contents of
 [code .th] files\u2014they can be arbitrary Tcl scripts.
-That said, 
+That said,
 the typical document file should go like this:
 "
 
@@ -378,8 +378,8 @@ beginDocument ?-file [var name].html? ?[var "attr..."]? {
 endDocument"
    }
 
-p "The comments at the top are for the benefit of human readers. 
-The incantation [code -*-tcl-*-] is for the sake of Emacs, which 
+p "The comments at the top are for the benefit of human readers.
+The incantation [code -*-tcl-*-] is for the sake of Emacs, which
 uses that as a hint to edit the file using Tcl-mode."
 
 p "My suggestion is that only the briefest definitions go before the
@@ -390,7 +390,7 @@ and invocations of the [code source] and [code package require] commands.
 p "Next is the [cix beginDocument]
 command which tells us the name
 of the output file, its metadata, and the attributes (if any) of the
-[code body] element.  The signature of the [code beginDocument] command 
+[code body] element.  The signature of the [code beginDocument] command
 is as follows:"
 
 blockquote "[code beginDocument] ?[code -file] [var outFileName]?\
@@ -398,7 +398,7 @@ blockquote "[code beginDocument] ?[code -file] [var outFileName]?\
 
 p "The [var outFileName] argument, if supplied, is the file name to
 write the HTML code to.  Otherwise [code thc] derives this from
-the input file name by replacing the [code .th] suffix with 
+the input file name by replacing the [code .th] suffix with
 [code .html].  This option can be used to generate several HTML files in one
 script."
 
@@ -423,7 +423,7 @@ blockquote* {
 p "
 (I have to admit that
 the mixture of [code body] attributes with the [code head] content is
-inconsistent with the other block-element commands.  I did it this way 
+inconsistent with the other block-element commands.  I did it this way
 because there are no interesting attributes for [code head] elements,
 and I did not want to have to have the entire body of the page
 enclosed in one long script.)
@@ -443,13 +443,13 @@ section "Tcl commands for HTML elements"
 subsection "Types of HTML element"
 
 p "
-The general approach we use is very similar to Libes's.  
+The general approach we use is very similar to Libes's.
 We have Tcl procs corresponding to the HTML elements.
 These elements can be divided into three categories:"
 
 ul {
     li "[dfn "In-line elements"]:
-    these  always fall within paragraphs, like [code em], 
+    these  always fall within paragraphs, like [code em],
     [code code], and [code img].
     Their content consists of other in-line elements.
     They are contained in paragraph elements."
@@ -471,7 +471,7 @@ p "
 This list is slightly different from the official HTML recommendations.
 The HTML specification groups both sorts of block element together,
 for example, and allows character data to appear within structure elements,
-whereas I restrict them to containing other blocks.  
+whereas I restrict them to containing other blocks.
 Here's a concrete example:
 "
 
@@ -498,13 +498,13 @@ table align=center {
 </body>}
 	}
     }
-}	
+}
 
 p "I like to think of fragment (a) as equivalent to fragment (b).  It
 might be that the DTD for HTML could be tweaked make this work,
-through the magic of [ix SGML]'s minimization rules.  In fact this is 
+through the magic of [ix SGML]'s minimization rules.  In fact this is
 [em not] the case\u2014the HTML[nbsp]4 specification makes it explicit that
-the undecorated [code Bar] is [em not] a paragraph.  
+the undecorated [code Bar] is [em not] a paragraph.
 On the other hand, in the absence of
 stylesheets, all browsers display the two examples identically (so far
 as I know).  You see the difference only when you use style sheets to
@@ -532,7 +532,7 @@ blockquote "[var tagName] ?[var attr]...? [var text]"
 p "Where the [var tagName] is the HTML tag name, in lower case
 (such as [code em], [code p]), the [var attr]s are
 attributes for that elemement (like [code class=var], [code align=right]),
-and the [var text] is the content of the element.  
+and the [var text] is the content of the element.
 For example, consider this
 this Tcl command:"
 
@@ -574,8 +574,8 @@ foreach tag $tags {
 }
 pop
 
-p  "The [code blockquote] command has a corresponding [em structural] 
-version called [cix blockquote*], for when you want to have 
+p  "The [code blockquote] command has a corresponding [em structural]
+version called [cix blockquote*], for when you want to have
 a quotation containing paragraphs, lists, etc."
 
 p "The [code title] element goes within a [code head] element,
@@ -583,7 +583,7 @@ not in the body of the document."
 
 p "The command [code pre] is special because
 its contents are written verbatum\u2014that is, the indentation
-of the lines is not adjusted, and newlines and whitespace 
+of the lines is not adjusted, and newlines and whitespace
 at the start and end are not trimmed.  It also takes an optional
 flag [code -encode] which causes the characters special to HTML
 ([code [amp]], [code [lt]] and [code [gt]]) to be encoded as
@@ -602,7 +602,7 @@ close $in}
 
 p "Here's the full syntax of the [code pre] command:"
 
-blockquote "[code pre] ?[code -encode]? ?[code --]? 
+blockquote "[code pre] ?[code -encode]? ?[code --]?
 ?[var attr]...? [var text]"
 
 
@@ -625,16 +625,16 @@ p "The [code em] command returns the HTML fragment
 for what it represents: [code [lt]em[gt]world[lt]/em[gt]].
 Thus the argument passed to the [code p] command is
 [code Hello, [lt]em[gt]world[lt]/em[gt]!].
-The [code p] command 
+The [code p] command
 emits HTML code into the HTML file.
 "
 
 p "There are two ways in which text with multiple words can be represented
 as arguments to a Tcl command\u2014as one argument per word, or as one arg.
 The former turns out to be more convenient in most cases in files,
-whereas the latter is occasionally 
+whereas the latter is occasionally
 required when you want to include attributes as
-well as content.  
+well as content.
 In the end the compromise I came up with was to create [em two]
 commands for each in-line element.  The first command has this
 syntax:"
@@ -643,19 +643,19 @@ blockquote "[var tagName] ?[var text]...?"
 
 p "The [var text] arguments are collected together with spaces between them
 and enclosed in matching tags, and the result returned as the value of the
-function.  This is the version used in the example above.  Here is an 
+function.  This is the version used in the example above.  Here is an
 example with a multi-word argument:"
 
 diptych {p [em Hello, world!]}
 
-p "The second version has its name formed by adding an asterisk to the 
+p "The second version has its name formed by adding an asterisk to the
 name of the HTML tag, and has this syntax:"
 
 blockquote "[var tagName][code *] ?[var attr]...? [var text]"
 
 p "Here's an example:"
 
-diptych {p [em* class=greeting "Hello, 
+diptych {p [em* class=greeting "Hello,
 world!"]}
 
 p "The following Tcl commands produce in-line elements in this fashion:"
@@ -676,7 +676,7 @@ foreach tag $tags {
 }
 pop
 
-p "The element [cix a] is a slightly special case. 
+p "The element [cix a] is a slightly special case.
 The simple verison has one required argument before the text arguments:"
 
 blockquote "[code a] [var uri] [var text]..."
@@ -684,11 +684,11 @@ blockquote "[code a] [var uri] [var text]..."
 p "The first argument is the value to be used in the [code href]
 attribute of this element.  For example:"
 
-diptych {p "Jump to 
+diptych {p "Jump to
 [a http://www.w3.org/ W3C]"}
 
-p "This command is only useful for making source anchors. 
-To make target anchors you must use the [code *]-form of the command, 
+p "This command is only useful for making source anchors.
+To make target anchors you must use the [code *]-form of the command,
 [cix a*]:"
 
 diptych {h2 "[a* name=2 "Chapter 2."]
@@ -696,7 +696,7 @@ Frogs and Toads"}
 
 p "
 To make things more interesting, the [ix XHTML] recommendation deprecates
-the attribute [cix name] in favour of the 
+the attribute [cix name] in favour of the
 attribute [cix id].  In an attempt to be forwards and backwards
 compatible, TclHTML will add the attrbute [code id] in XHTML files,
 and replace [code name] with [code id] in XML files.
@@ -706,9 +706,9 @@ and replace [code name] with [code id] in XML files.
 ########################################################################
 subsection "Structure elements"
 
-p "Structure elements are those HTML elements which 
+p "Structure elements are those HTML elements which
 contain other block elements.  This includes [cix ul]
-(which contains [cix li] elements), [cix table], 
+(which contains [cix li] elements), [cix table],
 and [cix body], for example.
 "
 
@@ -731,7 +731,7 @@ triptych \
 p "The Tcl fragment on the left produces the HTML fragment on thr right.
 Here the [code ul] command's script argument contains two [code li]
 commands, which produce the [code li] elements inteh HTML.
-The [code thc] program takes care of producing systematic 
+The [code thc] program takes care of producing systematic
 indentation, as well.  This is intended to make the resulting
 HTML code easier for humans to read."
 
@@ -761,10 +761,10 @@ defaultAttrs tr align=left valign=baseline
 
 p "
 The trick is what happens when you need to have table cells
-containing block elements\u2014such as when using tables to get 
+containing block elements\u2014such as when using tables to get
 a fancy page layout, or simply for tables containing paragraphs of text.
 It turns out that sometimes you need [code td] to be a paragraph-like element,
-and sometimes you need it to be a structure.  We get around this by 
+and sometimes you need it to be a structure.  We get around this by
 defining a separate command [code td*] which does structures.
 Here's an example:
 "
@@ -816,8 +816,8 @@ like [code [lt]br clear='all' /[gt]]), and sometimes definitely within
 paragraphs (usually as a plain [code [lt]br /[gt]] between lines of
 poetry, or lines of an address, and so on."
 
-p "You will notice that the syntax used for empty elements is 
-a little peculiar: there is a space an a slash before the 
+p "You will notice that the syntax used for empty elements is
+a little peculiar: there is a space an a slash before the
 closing [code [gt]] character.  This is a feature of the [ix XHTML] 1.0
 recommendation of the W3C, and is designed to make the resulting
 file understandable to XML readers as well as HTML readers."
@@ -833,13 +833,13 @@ blockquote "[var key][code =][var value][br][var value][br][cix ~][var key]"
 
 p "The first two have their usual SGML/HTML meaning.
 The third form stands for the [em absence] of an attribute,
-and is used to suppress a default attribute 
+and is used to suppress a default attribute
 ([a #defaultAttr described below])."
 
 p "
 You do not add [ix "quotation marks"] around the [var value]
 part of the attribute or to encode special characters like
-[code [gt]] and [code [quot]].  
+[code [gt]] and [code [quot]].
 TclHTML will add quotes automatically.  Here's an
 example:"
 
@@ -848,7 +848,7 @@ diptych {table width=100% align=left {}}
 p "
 TclHTML uses
 double quotes ([code [quot]])
-because this always works, even 
+because this always works, even
 if the attribute value contains an apostrophe.
 (Quotation marks in the attribute value are not a problem
 because they get encoded as [code "[amp]quot;"].)
@@ -860,21 +860,21 @@ without an equals sign.   Instead of the old-fashioned
 [code [lt]hr noshade[gt]] we
 use [code [lt]hr noshade='noshade' /[gt]].
 This is tough on older HTML readers, which don't understand the long form
-of these attributes.   
+of these attributes.
 "
 
 p "TclHTML uses a special
 shorthand for those elements which
-have a [em required] 
+have a [em required]
 attribute whose value is a [ix URI]
-([cix a], [cix img], [cix link], and [cix base], but not 
+([cix a], [cix img], [cix link], and [cix base], but not
 [cix a*]).  In this case, the URI
 is the first argument of the Tcl command, and the [code href=] (or
 [code src=]) is unnecessary:"
 
 diptych {p [a install.html INSTALL]}
 
-p "For every tag it is possible to set 
+p "For every tag it is possible to set
 [a* name=defaultAttrs [dfn default attributes]], using
 the command [cix defaultAttrs]:"
 
@@ -922,7 +922,7 @@ p "If all that TclHTML offered were the element-producing commands
 then it would not be much more than a different syntax of HTML files.
 In the course of building a site using TclHTML, you create Tcl
 commands for all the common elements, which expand into HTML code
-using the primitives described in §3.  We have supplied a few simple
+using the primitives described in ?3.  We have supplied a few simple
 shorthands in the TclHTML library:"
 
 
@@ -937,32 +937,32 @@ dl {
 
     dd "Names an external stylesheet for this document.
     Same as [code link href=][var uri] [code rel=stylesheet type=text/css].
-    Goes in the [code head] element (or in the script argument of 
+    Goes in the [code head] element (or in the script argument of
     [cix beginDocument])."
 
     dt "[cix keywords] [var keyword]..."
 
     dd "Supply keywords for the sake of some search engines.  This is
-    equivalent to 
+    equivalent to
     [code meta name=Keywords \"content=][var keyword]...[code \"]"
 
 
-    dt "[cix description] [var text]..."  
+    dt "[cix description] [var text]..."
 
     dd "Supplies a short
     summary of the document, for the sake of some search engines.
-    Equivalent to 
+    Equivalent to
     [code meta name=Description \"content=][var text][code \"]."
 
     dt "[cix refresh] [var seconds] ?[var uri]?"
 
     dd "This generates the [code meta] elkement that causes this page
-    to be reloaded automatically by clients thatunderstand this 
+    to be reloaded automatically by clients thatunderstand this
     [q client pull] convention.  The [var seconds] argument is an integer
     giving the delay in seconds before the new page is loaded.  The
     [var uri] argument si the address of the page to replace it with.
     If it is omitted then the present page wil be loaded again.  This
-    is all equivalent to the following command: 
+    is all equivalent to the following command:
     [code meta http-equiv=Refresh \"content=][var seconds][code \;]
     [code url=][var uri][code \"]"
 
@@ -973,7 +973,7 @@ subsection "Text commands"
 
 dl {
     dt "[cix q] [var text]..."
-    
+
     dd "HTML 4 defines an in-line element [code q] representing an
     in-line quotation.  The user's browser is expected to supply the
     quotation marks.  In practice, no browser that I know of supports
@@ -999,7 +999,7 @@ section "TclHTML framework"
 p "
 Having touched on higher-level commands,
 we now plunge into the depths of the lower-level
-TclHTML primitives.  
+TclHTML primitives.
 You should not need to worry about the facilites
 described here for everyday use of TclHTML.
 "
@@ -1040,7 +1040,7 @@ dl {
     dd "
     Open an HTML element with name [var tag]
     and the specified attributes.  `Open' means emitting the
-    start tag and 
+    start tag and
     increasing the prevailing indentation.
     This command maintains a stack of
     open elements."
@@ -1071,12 +1071,12 @@ dl {
     dd "
     Write the text in to the HTML file,
     adjusting the indentation if each line to match the prevailing
-    indentation.  
+    indentation.
     "
 }
 
 p "
-The general pattern for commands like [code tr], say, is 
+The general pattern for commands like [code tr], say, is
 first to check that a suitable containing element is open,
 using [q [code if {{[isElementOpen table]}}]...]
 and then use [code push tr \$attrs] to open a [code tr]
@@ -1093,7 +1093,7 @@ Here's a trivial example:
 
 triptych {push p
 set max 12
-emit "The first $max 
+emit "The first $max
 square numbers are:"
 for {set i 1} {$i < $max} {incr i} {
     emit "[expr $i * $i],"
@@ -1107,7 +1107,7 @@ pop
 subsection "Information about the TclHTML processor"
 
 p "
-Another TclHTML command gives access to information about the 
+Another TclHTML command gives access to information about the
 TclHTML system, an a fashion similar to the built-in Tcl command
 [code info].
 The syntax for the command is as follows:
@@ -1117,9 +1117,9 @@ blockquote "
 [code htmlInfo] [var key] ?[var value]?
 "
 
-p " 
+p "
 Usually the optional second argument [var value] is omitted and
-the [code htmlInfo] command returns the information identified by 
+the [code htmlInfo] command returns the information identified by
 [var key].  If optional argument is used internally to set the value for
 this item.
 
@@ -1153,8 +1153,8 @@ table border=1 cellspacing=0 cellpadding=4 {
     "
 
     item version "
-    Reurns the verion number for the script containing the 
-    TclHTML definitions.  
+    Reurns the verion number for the script containing the
+    TclHTML definitions.
     "
 
     item  versionMajor "
@@ -1167,7 +1167,7 @@ table border=1 cellspacing=0 cellpadding=4 {
 subsection "TclHTML Options"
 
 p "
-Some details of the way TclHTML operates are controlled by 
+Some details of the way TclHTML operates are controlled by
 options set with the [code htmlOption] command.
 The idea is similar to the Tk command [code option].
 The syntax for the command is as follows:
@@ -1219,19 +1219,19 @@ table border=1 cellspacing=0 cellpadding=4 {
     "
 
     item rootDir "" "
-    The inverse of the [code subDir] option:
-    the root of the document tree, relative to the [code subDir] option.
-    If [code subDir] is [code docs/manual], then this option
-    will be [code ../..].  Set automatically when [code subDir] is set.
+    The inverse of the [code pathFromRoot] option:
+    the root of the document tree, relative to the [code pathFromRoot] option.
+    If [code pathFromRoot] is [code docs/manual], then this option
+    will be [code ../..].  Set automatically when [code pathFromRoot] is set.
     "
 
-    item "subDir" {-s --subdir} "
+    item "pathFromRoot" {-s --subdir} "
     The directory this document is destined for
     relative to the document HTML root.
-    For example, if [code subDir] is [code doc/manual]
+    For example, if [code pathFromRoot] is [code doc/manual]
     and [code htmlRootDir] corresponds to [code ~/public_html],
-    then this document's URL would be 
-    [code ~/public_html/docs/manual/tclhtml.html]. 
+    then this document's URL would be
+    [code ~/public_html/docs/manual/tclhtml.html].
     Used when searching for image files.
     "
 
@@ -1240,12 +1240,12 @@ table border=1 cellspacing=0 cellpadding=4 {
     See the discussion of [a #xhtml XHTML and XML support].
     The permitted values are:
     [code html], [code html/4], [code xhtml], [code xhtml/1], and
-    [code xml]. 
+    [code xml].
     "
 }
 
 p "
-The option [code htmlRootDir] indicates where HTML files 
+The option [code htmlRootDir] indicates where HTML files
 will be deposited when this documetn is installed;
 TclHTML does not copy the files there itself.
 You may want to use [code thmkmf] to create a Makefile
@@ -1257,7 +1257,7 @@ that takes care of copying the files for you.
 subsection "[a* name=xhtml XHTML] and XML support"
 
 p "
-The world of HTML and XML is (at the time of writing) 
+The world of HTML and XML is (at the time of writing)
 in a state of transition from HTML, some of which is
 not XML-compatible, to XML, some of the syntax of
 which is not compatible with
@@ -1265,10 +1265,10 @@ older HTML parsers.
 "
 
 p "
-[a http://www.w3.org/TR/REC-xml XML] 
+[a http://www.w3.org/TR/REC-xml XML]
 is a more generic successor to HTML.
-It is simplified in the sense that some of what 
-SGML calls [dfn minimization] has been removed. 
+It is simplified in the sense that some of what
+SGML calls [dfn minimization] has been removed.
 For example, in HTML, [code border=1] and [code border='1']
 are equivalent.  In XML, only the second of these is permitted.
 XML is more generic than HTML in that HTML has a fixed
@@ -1277,9 +1277,9 @@ document-types to be defined, and even combined
 (using a feature called XML namespaces).
 "
 
-p " 
-[a http://www.w3.org/TR/2000/REC-xhtml1-20000126 XHTML 1.0] 
-is a recent (January 2000) reformulation of 
+p "
+[a http://www.w3.org/TR/2000/REC-xhtml1-20000126 XHTML 1.0]
+is a recent (January 2000) reformulation of
 [a http://www.w3.org/TR/html401 HTML 4.01] as an
 application of  XML.  This means that XHTML provides the same vocabulary
 of tags as HTML, using the XML syntax.  Because the permitted XML
@@ -1291,10 +1291,10 @@ thus forms a bridge between the confused HTML world of the 1990s and the
 furturistic world of XML."
 
 p "
-One of the advantages of the TclHTML approach is that 
+One of the advantages of the TclHTML approach is that
 switching it to generating XHTML instead of HTML is pretty easy,
 and does not require changing any [code .th] files at all.
-In the future, if it becomes necessary to 
+In the future, if it becomes necessary to
 tweak the syntax again, this should also be easy.
 "
 
@@ -1303,10 +1303,10 @@ The [a #syntax [code syntax]] option
 tweaks some of the details of the format of the code produced by
 TclHTML.  This may be necessary because there are some incompatibilites
 between XHTML and the older formulations of HTML.  The chief offender
-is attributes written without the equals sign, like 
+is attributes written without the equals sign, like
 [a #noshade [code noshade]] discussed above.  HTML 3.2 and HTML 4.0
 parsers should have no trouble with these, but really old programs might.
-The only effect should be that they ignore the attribute, which 
+The only effect should be that they ignore the attribute, which
 is generally harmless but not as pretty.  You can force a return to the
 old syntax by doing the TclHTML command
 "
@@ -1314,7 +1314,7 @@ old syntax by doing the TclHTML command
 blockquote [code htmlOption syntax html]
 
 p "
-before the [code beginDocument] command.  
+before the [code beginDocument] command.
 (The keyword [code html] must appear in lower case.)
 There is another permitted value, [code xml].  The only effect of that
 at present is to force the document to start with an XML
@@ -1377,8 +1377,8 @@ p "
 We have already discussed the top-level [code beginDocument] and
 [code endDocument] commands.  These commands take care of the
 HTML elements
-[code html], [code head] and [code body] for you.  You can instead generate 
-these elements [q manually].  
+[code html], [code head] and [code body] for you.  You can instead generate
+these elements [q manually].
 "
 
 p "(to be continued...)"
@@ -1389,22 +1389,22 @@ section "Managing collections of [code .th] files "
 
 subsection "Using [code make]"
 
-p " 
+p "
 
 There is not much point using TclHTML to produce only a single web
 page\u2014it will not be worth going to the trouble of writing a
-script unless you have a collection of pages with common features.  
-This means you are likely to find yourself with a 
+script unless you have a collection of pages with common features.
+This means you are likely to find yourself with a
 heap of [code .th] files, each producing one or more [code .html]
 files.  If you\u2019re anything like me you will want to use
 a program like [code make] to keep the HTML files up to date
-when you change the [code .th] files, and to look after other common tasks, 
+when you change the [code .th] files, and to look after other common tasks,
 like installing them on a web server.
 "
 
 p "
 
-Here\u2019s a simpliufied version of the Makefile I use in 
+Here\u2019s a simpliufied version of the Makefile I use in
 [a http://www.alleged.demon.co.uk/caption/c2000/ \
 "one of the subdirectories"]
 of [a http://www.alleged.demon.co.uk/ "my own web site"]
@@ -1413,14 +1413,14 @@ of [a http://www.alleged.demon.co.uk/ "my own web site"]
 
 blockquote* {
 pre -encode {THC = /home/pdc/bin/thc
-THCFLAGS = -r $(htmlRootDir) -s $(subDir)
+THCFLAGS = -r $(htmlRootDir) -s $(pathFromRoot)
 MAKE = make
 INSTALL_HTML = cp -p
 
 srcRootDir = ../..
 htmlRootDir = $(HOME)/public_html/alleged
-subDir = caption/c2000
-htmlDir = $(htmlRootDir)/$(subDir)
+pathFromRoot = caption/c2000
+htmlDir = $(htmlRootDir)/$(pathFromRoot)
 
 thFiles = index.th invite.th cmte.th exhibition.th
 htmlFiles = $(thFiles:.th=.html)
@@ -1432,7 +1432,7 @@ install: $(htmlFiles)
 
 clean:
 	rm -f $(htmlFiles) $(notablesFiles) img.data
-	for i in $(subDirs); do (cd $$i; $(MAKE) clean); done
+	for i in $(pathFromRoots); do (cd $$i; $(MAKE) clean); done
 
 $(thFiles:.th=.html): capDefs.tcl
 
@@ -1445,16 +1445,16 @@ $(thFiles:.th=.html): capDefs.tcl
 p "
 We use [code make] macros like [code THC] and [code THCFLAGS]
 in the same style as makefiles for compiling conventional programming
-languages.  
+languages.
 "
 
 subsection "Using the [code .files] files"
 
 p "
-The above makefile assumes that each [code .th] file generates a 
-single [code .html] file.  But it is possible to use the optional 
+The above makefile assumes that each [code .th] file generates a
+single [code .html] file.  But it is possible to use the optional
 [code -file] option to the [code beginDocument] command to
-generate several HTML files with one script.  
+generate several HTML files with one script.
 This does not cause a problem with the [code make all]
 target, so long as those scripts sill generate an HTML document named after
 the script: the extra HTML files will be generated a a side effect.
@@ -1479,8 +1479,8 @@ blockquote* {
     pre -encode {filesFiles = $(thFiles:.th=.files)
 
 install:	$(htmlFiles) $(notablesFiles)
-	for i in `cat $(filesFiles)`; do \ 
-		$(INSTALL_HTML) $$i $(htmlDir)/$$i; \ 
+	for i in `cat $(filesFiles)`; do \
+		$(INSTALL_HTML) $$i $(htmlDir)/$$i; \
 	done
 
 clean:
@@ -1493,7 +1493,7 @@ subsection "Creating makefiles with [code thmkmf]"
 p "
 It should be plain that when you have several directories of
 [code .th] files, it will become boring having to copy the makefile
-around and change the [code thFiles] line in each one.  To 
+around and change the [code thFiles] line in each one.  To
 avoid this I concocted a fairly simple script [code thmkmf]
 ([q [u T]cl[u H]TML [u m]a[u k]e [u m]ake[u f]ile])
 which examines the current directory and generates
@@ -1510,7 +1510,7 @@ This creates a new makefile called [code Makefile]
 in the current directory.
 It also recursively examines the subdirectories of the current directory,
 building them makefiles too.
-The subdirectories all have the [code subDir] 
+The subdirectories all have the [code pathFromRoot]
 macro set appropriately in the makefile.
 The assumption is that you want to create a set of pages
 whose directory structure matches the directory structure
@@ -1519,7 +1519,7 @@ of the [code .th] files.
 
 p "
 If you have anything other than [code .th] files
-that the makefile will need to know about, 
+that the makefile will need to know about,
 you can put extra commands in a file called [code extra.mk].
 The [code thmkmf] script will spot this an generate a line
 at the end of the makefile reading [code include extra.mk].
@@ -1556,7 +1556,7 @@ table with=100% border=0 cellpadding=4 cellspacing=0 cols=$nCols {
 		for {} {$i < $n2 * $icol && $i < $n} {incr i} {
 		    set text [lindex $texts $i]
 		    if {[llength $ixes($text)] > 1} {
-			push p class=ixitem 
+			push p class=ixitem
 			emit $text
 			set j 1
 			foreach frag $ixes($text) {

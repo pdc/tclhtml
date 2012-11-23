@@ -11,81 +11,81 @@ namespace eval html {
     set infos(versionMajor) 5
     set infos(version) $infos(versionMajor).[lindex $infos(id) 2]
     if {[llength $infos(id)] > 8} {
-	append infos(version) .1
+        append infos(version) .1
     }
 
     namespace export  htmlInfo htmlOption \
-	    emit emitVerbatum attrs defaultAttrs \
-	    push depth pop isElementOpen \
-	    html head title link meta \
-	    body h1 h2 h3 h4 h5 h6 p blockquote blockquote* pre script style \
-	    ul ol li \
-	    dl dt dd \
-	    table tr td th td* th* \
-	    div map form \
-	    hr br area\
-	    b i t s u em strong code var dfn cite small \
-	    big font span a sup sub \
-	    kbd var dfn cite abbr acronym ins del\
-    	    textarea\
-	    b* i* t* s* u* em* strong* code* var* dfn* cite* \
-	    small* big* font* span* a* sub* sub* \
-	    kbd* var* dfn* cite* abbr* acronym* ins* del*\
-    	    textarea*\
-	    img embed object br \
-	    amp lt gt quot nbsp \
-	    q stylesheet keywords description beginDocument endDocument
+            emit emitVerbatum attrs defaultAttrs \
+            push depth pop isElementOpen \
+            html head title link meta \
+            body h1 h2 h3 h4 h5 h6 p blockquote blockquote* pre script style \
+            ul ol li \
+            dl dt dd \
+            table tr td th td* th* \
+            div map form \
+            hr br area\
+            b i t s u em strong code var dfn cite small \
+            big font span a sup sub \
+            kbd var dfn cite abbr acronym ins del\
+                textarea\
+            b* i* t* s* u* em* strong* code* var* dfn* cite* \
+            small* big* font* span* a* sub* sub* \
+            kbd* var* dfn* cite* abbr* acronym* ins* del*\
+                textarea*\
+            img embed object br \
+            amp lt gt quot nbsp \
+            q stylesheet keywords description beginDocument endDocument
 
-    
+
     # User options
-    set opts(syntax) xhtml;	# we have feeble gestures towards XML
+    set opts(syntax) xhtml;        # we have feeble gestures towards XML
     set opts(out) stdout
-    set opts(subDir) .;		# where this dir is relative to root
-    set opts(rootDir) .;	# where root is relative to this dir
-    set opts(htmlRootDir) .;	# root of target for HTML files
-    set opts(encoding) UTF-8; 	# encoding (Internet format)
+    set opts(pathFromRoot) .;                # where this dir is relative to root
+    set opts(rootDir) .;        # where root is relative to this dir
+    set opts(htmlRootDir) .;        # root of target for HTML files
+    set opts(encoding) UTF-8;         # encoding (Internet format)
 
     # Internal state
-    set Stack {};		# list of open elements, outermost first
-    set Indent {};		# string to insert at the start of lines
+    set Stack {};                # list of open elements, outermost first
+    set Indent {};                # string to insert at the start of lines
 }
 
 # htmlInfo --
-#  Return misc info for the 
+#  Return misc info for the
 proc html::htmlInfo {key args} {
     variable infos
     if {[llength $args] == 0} {
-	return $infos($key)
+        return $infos($key)
     } elseif {[llength $args] == 1} {
-	set infos($key) [lindex $args end]
+        set infos($key) [lindex $args end]
     } else {
-	error "Too many arguments to htmlInfo"
+        error "Too many arguments to htmlInfo"
     }
 }
 
 # htmlOption --
 #  Set an option controlling the HTML generator.
-#  
+#
 proc html::htmlOption {key args} {
     variable opts
     if {[llength $args] == 0} {
-	return $opts($key)
+        return $opts($key)
     } elseif {[llength $args] == 1} {
-	set opts($key) [lindex $args end]
-	if {[string compare $key subDir] == 0} {
-	    foreach d [file split $opts(subDir)] {
-		append rd /..
-	    }
-	    if {[string length $rd] > 1} {
-		set rd [string range $rd 1 end]
-	    } else {
-		set rd .
-	    }
-	    puts stderr rootDir=$rd
-	    set opts(rootDir) $rd
-	}
+        set opts($key) [lindex $args end]
+        if {[string compare $key pathFromRoot] == 0} {
+            foreach d [file split $opts(pathFromRoot)] {
+                append rd /..
+            }
+            if {[string length $rd] > 1} {
+                set rd [string range $rd 1 end]
+            } else {
+                set rd .
+            }
+            puts stderr rootDir=$rd
+            set opts(rootDir) $rd
+        }
     } else {
-	error "Too many arguments to htmlOption"
+        error "Too many arguments to htmlOption"
     }
 }
 
@@ -105,7 +105,7 @@ proc html::emit {text} {
     variable opts
     variable Indent
     foreach line  [split $text \n] {
-	puts $opts(out) $Indent[string trim $line]
+        puts $opts(out) $Indent[string trim $line]
     }
 }
 
@@ -139,74 +139,74 @@ proc html::push {tag args} {
 #  words, (as in <hr noshade>), are written *twice*
 #  (as in <hr noshade noshade='noshade'>).  Yuk.
 proc html::attrs {tag xs} {
-    variable defaults 
+    variable defaults
     variable opts
 
     # Append to xs any defaults not already given a value in xs:
     if {[info exists defaults($tag)]} {
-	foreach def $defaults($tag) {
-	    regexp "^~?(\[^~=]*)" $def dummy key
-	    if {[lsearch -regexp $xs "~?${key}(=.*)?$"] < 0} {
-		lappend xs $def
+        foreach def $defaults($tag) {
+            regexp "^~?(\[^~=]*)" $def dummy key
+            if {[lsearch -regexp $xs "~?${key}(=.*)?$"] < 0} {
+                lappend xs $def
     }   }   }
 
     # Now assemble the attributes in an HTML-friendly syntax:
     set text {}
     foreach x $xs {
-	if {[string match ~* $x]} continue
+        if {[string match ~* $x]} continue
 
-	#### regsub "=(.*\[^a-z0-9.-].*|)\$" $x "=\"\\1\"" x
-	##regsub "^(\[^=]+)\$" $x "& &=&" x
+        #### regsub "=(.*\[^a-z0-9.-].*|)\$" $x "=\"\\1\"" x
+        ##regsub "^(\[^=]+)\$" $x "& &=&" x
 
-	if {"$opts(syntax)" != "html"} {
-	    regsub "^(\[^=]+)\$" $x "&=&" x
-	}
+        if {"$opts(syntax)" != "html"} {
+            regsub "^(\[^=]+)\$" $x "&=&" x
+        }
 
-	# Canonicalize by converting "a = 'b'" to "a=b".
-	regsub "\[ \t\r\n]*=\[ \t\r\n]*" $x = x
-	regsub "=(\[\"'])(.*)\\1\$" $x "=\\2" x
+        # Canonicalize by converting "a = 'b'" to "a=b".
+        regsub "\[ \t\r\n]*=\[ \t\r\n]*" $x = x
+        regsub "=(\[\"'])(.*)\\1\$" $x "=\\2" x
 
-	# Escape characters special to XML.
-	regsub -all -nocase "&amp;" $x "\\&" x
-	regsub -all "\\&" $x "\\&amp;" x
-	regsub -all "\"" $x "\\&quot;" x
-	regsub -all "<" $x "\\&lt;" x
-	regsub -all ">" $x "\\&gt;" x
+        # Escape characters special to XML.
+        regsub -all -nocase "&amp;" $x "\\&" x
+        regsub -all "\\&" $x "\\&amp;" x
+        regsub -all "\"" $x "\\&quot;" x
+        regsub -all "<" $x "\\&lt;" x
+        regsub -all ">" $x "\\&gt;" x
 
-	switch -- $opts(syntax) {
-	    html - html/* {
-		# Only quote if non-name character included.
-		regsub "=(.*\[^a-zA-Z0-9+.-].*)\$" $x "=\"\\1\"" x
-	    }
-	    default {
-		# Quoting is mandatory in XML.
-		regsub "=(.*)\$" $x "=\"\\1\"" x
-	}   }
+        switch -- $opts(syntax) {
+            html - html/* {
+                # Only quote if non-name character included.
+                regsub "=(.*\[^a-zA-Z0-9+.-].*)\$" $x "=\"\\1\"" x
+            }
+            default {
+                # Quoting is mandatory in XML.
+                regsub "=(.*)\$" $x "=\"\\1\"" x
+        }   }
 
-	# Check for the deprecated attrribute 'name'.
-	if {[regexp -nocase "^name=\"(.*)\"\$" $x dummy val] && \
-		[string compare $tag meta] != 0} {
-	    switch -- $opts(syntax) {
-		html - html/* {
-		    # Leave it.
-		}
-		xhtml - xhtml/* {
-		    # Arrange to have id=n appended in addition to name=n.
-		    set id $val
-		}
-		xml - xml/* {
-		    # Replace name=n with id=n.
-		    set x "id=\"$val\""
-	    }   }   
-	} elseif {[string match id=* $x]} {
-	    set hadId 1
-	}
+        # Check for the deprecated attrribute 'name'.
+        if {[regexp -nocase "^name=\"(.*)\"\$" $x dummy val] && \
+                [string compare $tag meta] != 0} {
+            switch -- $opts(syntax) {
+                html - html/* {
+                    # Leave it.
+                }
+                xhtml - xhtml/* {
+                    # Arrange to have id=n appended in addition to name=n.
+                    set id $val
+                }
+                xml - xml/* {
+                    # Replace name=n with id=n.
+                    set x "id=\"$val\""
+            }   }
+        } elseif {[string match id=* $x]} {
+            set hadId 1
+        }
 
-	append text " " $x
+        append text " " $x
     }
 
     if {[info exists id] && ![info exists hadId]} {
-	append text " id=\"$id\""
+        append text " id=\"$id\""
     }
 
     return $text
@@ -217,13 +217,13 @@ proc html::attrs {tag xs} {
 proc html::defaultAttrs {tag args} {
     variable defaults
     if {[llength $args] == 0} {
-	if {[info exists defaults($tag)]} {
-	    return $defaults($tag)
-	} {
-	    return {}
-	}
+        if {[info exists defaults($tag)]} {
+            return $defaults($tag)
+        } {
+            return {}
+        }
     } else {
-	set defaults($tag) $args
+        set defaults($tag) $args
 }   }
 
 # depth --
@@ -261,13 +261,13 @@ proc html::isElementOpen {tag} {
 #  is a Tcl script for generating the contents of the element.
 proc html::BlockElement1 {tag args} {
     if {[llength $args] > 0} {
-	set script [lindex $args end]
-	set args [lrange $args 0 [expr [llength $args] - 2]]
-	eval push $tag $args
-	uplevel $script
-	pop
+        set script [lindex $args end]
+        set args [lrange $args 0 [expr [llength $args] - 2]]
+        eval push $tag $args
+        uplevel $script
+        pop
     } else {
-	emit "<$tag></$tag>"
+        emit "<$tag></$tag>"
     }
 }
 
@@ -281,16 +281,16 @@ proc html::BlockElement1 {tag args} {
 proc html::BlockElement {tag parent args} {
     variable opts
     if {![isElementOpen $parent]} {
-	error "`$tag' elements must go within `$parent'"
+        error "`$tag' elements must go within `$parent'"
     }
     if {[llength $args] > 0} {
-	set script [lindex $args end]
-	set args [lrange $args 0 [expr [llength $args] - 2]]
-	eval push $tag $args
-	uplevel $script
-	pop
+        set script [lindex $args end]
+        set args [lrange $args 0 [expr [llength $args] - 2]]
+        eval push $tag $args
+        uplevel $script
+        pop
     } else {
-	emit "<$tag></$tag>"
+        emit "<$tag></$tag>"
 }   }
 
 # ParElement1 --
@@ -299,17 +299,17 @@ proc html::BlockElement {tag parent args} {
 proc html::ParElement1 {tag args} {
     variable opts
     if {[llength $args] > 0} {
-	set text [string trim [lindex $args end]]
-	set args [lrange $args 0 [expr [llength $args] - 2]]
-	if {[string first \n $text] >= 0} {
-	    eval push $tag $args
-	    emit $text
-	    pop
-	} else {
-	    emit "<$tag[attrs $tag $args]>$text</$tag>"
-	}
+        set text [string trim [lindex $args end]]
+        set args [lrange $args 0 [expr [llength $args] - 2]]
+        if {[string first \n $text] >= 0} {
+            eval push $tag $args
+            emit $text
+            pop
+        } else {
+            emit "<$tag[attrs $tag $args]>$text</$tag>"
+        }
     } else {
-	emit "<$tag></$tag>"
+        emit "<$tag></$tag>"
 }   }
 
 # ParElement --
@@ -317,20 +317,20 @@ proc html::ParElement1 {tag args} {
 proc html::ParElement {tag parent args} {
     variable opts
     if {![isElementOpen $parent]} {
-	error "`$tag' belongs inside `$parent'"
+        error "`$tag' belongs inside `$parent'"
     }
     if {[llength $args] > 0} {
-	set text [string trim [lindex $args end]]
-	set args [lrange $args 0 [expr [llength $args] - 2]]
-	if {[string first \n $text] >= 0} {
-	    eval push $tag $args
-	    emit $text
-	    pop
-	} else {
-	    emit "<$tag[attrs $tag $args]>$text</$tag>"
-	}
+        set text [string trim [lindex $args end]]
+        set args [lrange $args 0 [expr [llength $args] - 2]]
+        if {[string first \n $text] >= 0} {
+            eval push $tag $args
+            emit $text
+            pop
+        } else {
+            emit "<$tag[attrs $tag $args]>$text</$tag>"
+        }
     } else {
-	emit <$tag></$tag>
+        emit <$tag></$tag>
 }   }
 
 # EmptyElement1 --
@@ -341,15 +341,15 @@ proc html::ParElement {tag parent args} {
 proc html::EmptyElement1 {tag args} {
     variable opts
     switch $opts(syntax) {
-	html {
-	    emit "<$tag[attrs $tag $args]>"
-	}
-	xml {
-	    emit "<$tag[attrs $tag $args]/>"
-	}
-	default {
-	    emit "<$tag[attrs $tag $args] />"
-	}
+        html {
+            emit "<$tag[attrs $tag $args]>"
+        }
+        xml {
+            emit "<$tag[attrs $tag $args]/>"
+        }
+        default {
+            emit "<$tag[attrs $tag $args] />"
+        }
     }
 }
 
@@ -357,7 +357,7 @@ proc html::EmptyElement1 {tag args} {
 #  Like EmptyElement1, except that it checks that a PARENT element is open.
 proc html::EmptyElement {tag parent args} {
     if {![isElementOpen $parent]} {
-	error "`$tag' belongs inside `$parent'"
+        error "`$tag' belongs inside `$parent'"
     }
     eval EmptyElement1 $tag $args
 }
@@ -446,24 +446,24 @@ proc html::pre {args} {
     set encode 0
     set scan 1
     while {$scan} {
-	switch -exact -- [lindex $args 0] {
-	    -encode {
-		set encode 1
-		set args [lrange $args 1 end]
-	    }
-	    -- {
-		set args [lrange $args 1 end]
-		set scan 0
-	    }
-	    default {
-		set scan 0
+        switch -exact -- [lindex $args 0] {
+            -encode {
+                set encode 1
+                set args [lrange $args 1 end]
+            }
+            -- {
+                set args [lrange $args 1 end]
+                set scan 0
+            }
+            default {
+                set scan 0
     }   }   }
     set text [lindex $args end]
     set args [lrange $args 0 [expr [llength $args] - 2]]
     if {$encode} {
-	regsub -all & $text "\\&amp;" text
-	regsub -all < $text "\\&lt;" text
-	regsub -all > $text "\\&gt;" text
+        regsub -all & $text "\\&amp;" text
+        regsub -all < $text "\\&lt;" text
+        regsub -all > $text "\\&gt;" text
     }
     emit <pre[attrs pre $args]>
     emitVerbatim $text</pre>
@@ -473,7 +473,7 @@ proc html::pre {args} {
 # In XML files, use CDATA; in HTML, use cheezy comments.
 # In XHTML, I'm not sure what we should do...!
 #
-# Note! To make an empty script element, you must 
+# Note! To make an empty script element, you must
 # have an emptry string as last arg:
 #  script src=foo.js {}
 proc html::scriptOrStyle {tag args} {
@@ -483,12 +483,12 @@ proc html::scriptOrStyle {tag args} {
     set args [lrange $args 0 [expr [llength $args] - 2]]
 
     switch $opts(syntax) {
-	html/4 - html {
-	    set text "<!--\n$text\n// -->" 
-	}
-	xml {
-	    set text "<!\[CDATA\[\n$text\n\]\]>"
-	}
+        html/4 - html {
+            set text "<!--\n$text\n// -->"
+        }
+        xml {
+            set text "<!\[CDATA\[\n$text\n\]\]>"
+        }
     }
     eval push $tag $args
     emitVerbatim $text
@@ -501,7 +501,7 @@ proc html::script {args} {
 
 proc html::style {args} {
     if {![isElementOpen head]} {
-	error "`style' elements must go within `head'"
+        error "`style' elements must go within `head'"
     }
     eval html::scriptOrStyle style $args
 }
@@ -509,7 +509,7 @@ proc html::style {args} {
 
 proc html::li {args} {
     if {![isElementOpen ol] && ![isElementOpen ul]} {
-	error "`li' must go inside `ol' or `ul'"
+        error "`li' must go inside `ol' or `ul'"
     }
     eval ParElement1 li $args
 }
@@ -518,9 +518,9 @@ proc html::li {args} {
 #  dt TEXT
 #  dd TEXT
 # }
-foreach tag {dt dd} { 
+foreach tag {dt dd} {
     proc html::$tag {args} "
-	eval ParElement $tag dl \$args
+        eval ParElement $tag dl \$args
     "
 }
 
@@ -560,7 +560,7 @@ foreach tag {
     textarea
 } {
     proc html::$tag* {args} "
-    	return \[eval InlineTextElement $tag \$args]
+            return \[eval InlineTextElement $tag \$args]
     "
     proc html::$tag {args} "
     return \[eval InlineTextElement $tag \[list \[join \$args { }]]]
@@ -571,13 +571,13 @@ proc html::a {href args} {
 }
 foreach tag {br input} {
     proc html::$tag {args} "
-    	return \[eval InlineEmptyElement $tag \$args]
+            return \[eval InlineEmptyElement $tag \$args]
     "
 }
 
 # img --
 #  An in-line image tag.
-#  Examines the image file, if possible, to deduce the default 
+#  Examines the image file, if possible, to deduce the default
 #  width and height of the image.
 proc html::img {src args} {
     variable opts
@@ -588,69 +588,71 @@ proc html::img {src args} {
 
     # do we need to supply a width or height?
     array set needs {
-	width 0
-	height 0
+        width 0
+        height 0
     }
     foreach key {width height} {
-	if {[lsearch -regexp $args "~?${key}(=.*)?$"] < 0 \
-		&& (![info exists defaults(img)] \
-		|| [lsearch -regexp $defaults(img) "~?${key}(=.*)?$"] < 0)} {
-	    set needs($key) 1
+        if {[lsearch -regexp $args "~?${key}(=.*)?$"] < 0 \
+                && (![info exists defaults(img)] \
+                || [lsearch -regexp $defaults(img) "~?${key}(=.*)?$"] < 0)} {
+            set needs($key) 1
     }   }
 
     if {$needs(width) || $needs(height)} {
-	# have we read in the data file yet?
-	if {![info exists widths] && [file exists img.data]} {
-	    Log "Reading img.data"
-	    interp create -safe tmpInterp
-	    tmpInterp alias img ::html::Img
-	    set nImages 0
-	    interp invokehidden tmpInterp source img.data
-	    interp delete tmpInterp
-	    Log "Read $nImages img infos."
-	}
+        # have we read in the data file yet?
+        if {![info exists widths] && [file exists img.data]} {
+            Log "Reading img.data"
+            interp create -safe tmpInterp
+            tmpInterp alias img ::html::Img
+            set nImages 0
+            interp invokehidden tmpInterp source img.data
+            interp delete tmpInterp
+            Log "Read $nImages img infos."
+        }
 
-	if {![info exists widths($src)]} {
-	    foreach dir [list $opts(htmlRootDir) $opts(rootDir)] {
-		set imgFile [file nativename \
-			[file join $dir $opts(subDir) $src]]
-		if {[file exists $imgFile]} {
-		    break
-	    }   }
-	    Log "Examining $imgFile:"
-	    
-	    switch -glob -- $src {
-		*.jpg - *.jpeg - *.JPG {
-		    set cmd [list exec djpeg $imgFile] 
-		}
-		*.gif - *.GIF {
-		    set cmd [list exec giftopnm $imgFile]
-		}
-		*.png - *.PNG {
-		    set cmd [list exec pngtopnm $imgFile]
-		}
-		default {
-		    set cmd [list exec anytopnm $imgFile]
-	    }   }
-	    set filt [list 2>@stderr | sh -c {pnmfile 2>&1; cat >/dev/null}]
-	    if {[catch [concat $cmd $filt] res]} {
-		error "command '$cmd' failed '$res'"
-	    }
-	    set widths($src) [lindex $res 3]
-	    set heights($src) [lindex $res 5]
-	    Log "\t- size=$widths($src)x$heights($src)"
-	    
-	    set out [open img.data a]
-	    puts $out [list img $src $widths($src) $heights($src)]
-	    close $out
-	}
+        if {![info exists widths($src)]} {
+            foreach dir [list $opts(htmlRootDir) ""] {
+                set imgFile [file nativename \
+                        [file join $opts(rootDir) $dir $opts(pathFromRoot) $src]]
+                if {[file exists $imgFile]} {
+                    break
+                }
+                Log "Not $imgFile"
+            }
+            Log "Examining $imgFile:"
 
-	if {$needs(width)} {
-	    lappend args width=$widths($src)
-	}
-	if {$needs(height)} {
-	    lappend args height=$heights($src)
-	}
+            switch -glob -- $src {
+                *.jpg - *.jpeg - *.JPG {
+                    set cmd [list exec djpeg $imgFile]
+                }
+                *.gif - *.GIF {
+                    set cmd [list exec giftopnm $imgFile]
+                }
+                *.png - *.PNG {
+                    set cmd [list exec pngtopnm $imgFile]
+                }
+                default {
+                    set cmd [list exec anytopnm $imgFile]
+            }   }
+            set filt [list 2>@stderr | sh -c {pnmfile 2>&1; cat >/dev/null}]
+            if {[catch [concat $cmd $filt] res]} {
+                error "command '$cmd' failed '$res'"
+            }
+            set widths($src) [lindex $res 3]
+            set heights($src) [lindex $res 5]
+            Log "\t- size=$widths($src)x$heights($src)"
+
+            set out [open img.data a]
+            puts $out [list img $src $widths($src) $heights($src)]
+            close $out
+        }
+
+        if {$needs(width)} {
+            lappend args width=$widths($src)
+        }
+        if {$needs(height)} {
+            lappend args height=$heights($src)
+        }
     }
     return [eval InlineEmptyElement img [list src=$src] $args]
 }
@@ -683,22 +685,22 @@ proc html::object {args} {
 
     set pos [lsearch -exact $args -params]
     if {$pos == 0} {
-	set params [lrange $args 1 end]
-	set args {}
+        set params [lrange $args 1 end]
+        set args {}
     } elseif {$pos == [llength $args] - 1} {
-	set args [lrange $args [expr [llength $args] - 2]]
-	set params {}
+        set args [lrange $args [expr [llength $args] - 2]]
+        set params {}
     } elseif {$pos > 0} {
-	set params [lrange $args [expr $pos + 1] end]
-	set args [lrange $args [expr $pos - 1]]
+        set params [lrange $args [expr $pos + 1] end]
+        set args [lrange $args [expr $pos - 1]]
     } else {
-	set params {}
+        set params {}
     }
 
     set result "<object[attrs object $args]>"
     foreach param $params {
-	regexp (.*)=(.*) $param dummy key val
-	append result "\n  <param name=\"$key\" value=\"$val\" />"
+        regexp (.*)=(.*) $param dummy key val
+        append result "\n  <param name=\"$key\" value=\"$val\" />"
     }
     return "$result\n$content\n</object>"
 }
@@ -710,7 +712,7 @@ foreach entity {amp lt gt quot nbsp} {
 
 
 #
-# "Derrived" elements -- these evaluate into 
+# "Derrived" elements -- these evaluate into
 #  one or more HTML elements
 #
 
@@ -739,7 +741,7 @@ proc html::description {text} {
 
 proc html::svg {uri args} {
     return [eval InlineEmptyElement embed [list src=$uri type=image/svg+xml]\
-	    $args]
+            $args]
 }
 
 
@@ -747,7 +749,7 @@ proc html::svg {uri args} {
 # beginDocument --
 #  Start writing an HTML document.
 #  This creates or replaces the output file, emits the
-#  DOCTYPE element, and 
+#  DOCTYPE element, and
 #  opens the HTML element that encompasses everything,
 #  generates the HEAD element, and opens the BODY element.
 # Arguments --
@@ -764,35 +766,35 @@ proc html::beginDocumentHelper {rootEType headEType bodyEType args} {
     set outFileName [file rootname $infos(inFileName)].html
     set scan 1
     while {$scan} {
-	switch -exact -- [lindex $args 0] {
-	    -file {
-		set outFileName [lindex $args 1]
-		set args [lrange $args 2 end]
-	    }
-	    -encoding {
-		set opts(encoding) [lindex $args 1]
-		set args [lrange $args 2 end]
-	    }
-	    -- {
-		set args [lrange $args 1 end]
-		set scan 0
-	    }
-	    default {
-		set scan 0
+        switch -exact -- [lindex $args 0] {
+            -file {
+                set outFileName [lindex $args 1]
+                set args [lrange $args 2 end]
+            }
+            -encoding {
+                set opts(encoding) [lindex $args 1]
+                set args [lrange $args 2 end]
+            }
+            -- {
+                set args [lrange $args 1 end]
+                set scan 0
+            }
+            default {
+                set scan 0
     }   }   }
 
     set opts(out) [open $outFileName w]
     if {[info tclversion] > 8.1} {
-	regsub iso- [string tolower $opts(encoding)] iso e
-	fconfigure $opts(out) -encoding $e
+        regsub iso- [string tolower $opts(encoding)] iso e
+        fconfigure $opts(out) -encoding $e
     }
     set infos(outFileName) $outFileName
 
     # Write the output file name to foo.files.
     if {![info exists infos(filesFile)]} {
-	set filesFileName [file root $infos(inFileName)].files
-	set infos(filesFile) [open $filesFileName w]
-	set infos(filesFileName) $filesFileName
+        set filesFileName [file root $infos(inFileName)].files
+        set infos(filesFile) [open $filesFileName w]
+        set infos(filesFileName) $filesFileName
     }
     puts $infos(filesFile) $outFileName
     flush $infos(filesFile)
@@ -800,31 +802,31 @@ proc html::beginDocumentHelper {rootEType headEType bodyEType args} {
     set script [lindex $args end]
     set args [lrange $args 0 [expr [llength $args] - 2]]
     switch $opts(syntax) {
-	html/4 - html {
-	    emit "<!DOCTYPE HTML\
-		    PUBLIC '-//W3C//DTD HTML 4.0 Transitional//EN'\n\t\
-		    'http://www.w3.org/TR/REC-html40/loose.dtd'>"
-	    push html
-	}
-	xhtml/1 - xhtml {
-	    emit "<!DOCTYPE html\
-		    PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'\n\t\
-		    'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
-	    push html xmlns=http://www.w3.org/1999/xhtml
-	}
-	xml {
-	    emit "<?xml version='1.0' encoding='$opts(encoding)'?>"
-	    emit "<!DOCTYPE html\
-		    PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'\n\t\
-		    'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
-	    push html xmlns=http://www.w3.org/1999/xhtml
-	}
-	default {
-	    push html
-	}
+        html/4 - html {
+            emit "<!DOCTYPE HTML\
+                    PUBLIC '-//W3C//DTD HTML 4.0 Transitional//EN'\n\t\
+                    'http://www.w3.org/TR/REC-html40/loose.dtd'>"
+            push html
+        }
+        xhtml/1 - xhtml {
+            emit "<!DOCTYPE html\
+                    PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'\n\t\
+                    'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
+            push html xmlns=http://www.w3.org/1999/xhtml
+        }
+        xml {
+            emit "<?xml version='1.0' encoding='$opts(encoding)'?>"
+            emit "<!DOCTYPE html\
+                    PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'\n\t\
+                    'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
+            push html xmlns=http://www.w3.org/1999/xhtml
+        }
+        default {
+            push html
+        }
     }
     emit "<!-- Generated from [htmlInfo inFileName] on\
-	    [clock format [clock seconds] -format "%Y-%m-%d %H:%M %Z"] -->"
+            [clock format [clock seconds] -format "%Y-%m-%d %H:%M %Z"] -->"
     regsub -all -- --subdir $argv -s xs
     regsub -all -- --html_?root $xs -r xs
     regsub -all -- -- $xs "- -" xs
@@ -837,7 +839,7 @@ proc html::beginDocumentHelper {rootEType headEType bodyEType args} {
     pop
 
     if {[string compare $bodyEType ""] != 0} {
-	eval push $bodyEType $args
+        eval push $bodyEType $args
     }
 }
 
@@ -853,7 +855,7 @@ proc html::endDocument {} {
     variable infos
 
     if {[depth] > 2} {
-	error "`endDocument' belongs after all page content"
+        error "`endDocument' belongs after all page content"
     }
     pop; # body
     pop; # html

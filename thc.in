@@ -15,7 +15,7 @@ exec #TCLSH# "$0" "$@"
 
 set id {$Id: thc.in,v 1.2 2001/01/26 22:59:32 pdc Exp $}
 
-set tclhtml_libdir . 
+set tclhtml_libdir .
 
 source [file join $tclhtml_libdir htmlProcs.tcl]
 namespace import html::*
@@ -28,14 +28,14 @@ foreach arg $argv {
 	unset opt
     } else {
 	switch -glob -- $arg {
-	    -s - --sub - --subdir {
-		set opt subDir
+	    -s - --subdir {
+		set opt pathFromRoot
 	    }
 	    --subdir=* {
-		regsub "^--subdir=" $arg "" subDir
-		htmlOption subDir $subDir
+		regsub "^--subdir=" $arg "" pathFromRoot
+		htmlOption pathFromRoot $pathFromRoot
 	    }
-	    -r - --html - --html_root - --htmlroot {
+	    -r - --html_root {
 		set opt htmlRootDir
 	    }
 	    --html_root=* {
